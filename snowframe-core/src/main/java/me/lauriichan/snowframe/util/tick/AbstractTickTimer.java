@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractTickTimer {
 
+    private static final long MIN_IN_NANOS = TimeUnit.MINUTES.toNanos(1);
     private static final long SEC_IN_NANOS = TimeUnit.SECONDS.toNanos(1);
     private static final long MILLI_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(1);
 
@@ -129,9 +130,8 @@ public abstract class AbstractTickTimer {
         long prevNanoTime = System.nanoTime();
         long nanoTime = prevNanoTime;
         long delta = 0;
-        long elapsed = 0;
+        long elapsed = 0, elapsedMin = 0;
         int counter = 0;
-        int secondTick = 0;
         int secondCounter = 0;
         int currentState;
         while (true) {
@@ -153,11 +153,11 @@ public abstract class AbstractTickTimer {
                     this.tps = counter;
                     secondCounter += counter;
                     counter = 0;
-                    if (++secondTick == 60) {
-                        this.tpm = secondCounter;
-                        secondCounter = 0;
-                        secondTick = 0;
-                    }
+                }
+                if (elapsedMin >= MIN_IN_NANOS) {
+                    elapsedMin = MIN_IN_NANOS - elapsedMin;
+                    this.tpm = secondCounter + counter;
+                    secondCounter = 0;
                 }
                 counter++;
                 delta = nanoTime - System.nanoTime();

@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.longs.LongConsumer;
 
 public class BlockingTicker {
 
+    private static final long MIN_IN_NANOS = TimeUnit.MINUTES.toNanos(1);
     private static final long SEC_IN_NANOS = TimeUnit.SECONDS.toNanos(1);
     private static final long MILLI_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(1);
 
@@ -98,7 +99,6 @@ public class BlockingTicker {
             long delta = 0;
             long elapsed = 0, elapsedMin = 0;
             int counter = 0;
-            int secondTick = 0;
             int secondCounter = 0;
             int currentState;
             while (true) {
@@ -114,17 +114,18 @@ public class BlockingTicker {
                     nanoTime = System.nanoTime();
                     delta = nanoTime - prevNanoTime;
                     elapsed += delta;
+                    elapsedMin += delta;
                     executable.accept(delta);
                     if (elapsed >= SEC_IN_NANOS) {
                         elapsed = SEC_IN_NANOS - elapsed;
                         this.tps = counter;
                         secondCounter += counter;
                         counter = 0;
-                        if (++secondTick == 60) {
-                            this.tpm = secondCounter;
-                            secondCounter = 0;
-                            secondTick = 0;
-                        }
+                    }
+                    if (elapsedMin >= MIN_IN_NANOS) {
+                        elapsedMin = MIN_IN_NANOS - elapsedMin;
+                        this.tpm = secondCounter + counter;
+                        secondCounter = 0;
                     }
                     counter++;
                     delta = nanoTime - System.nanoTime();
