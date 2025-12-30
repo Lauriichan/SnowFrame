@@ -1,0 +1,122 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>me.lauriichan.snowframe</groupId>
+	<artifactId>snowframe-parent</artifactId>
+	<version>1.0.0</version>
+	<packaging>pom</packaging>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <target.java.version>21</target.java.version>
+        
+        <maven.test.failure.ignore>true</maven.test.failure.ignore>
+        
+        <!-- Plugins -->
+        <maven-source-plugin.version>2.0.0</maven-source-plugin.version>
+        
+        <!-- Dependencies -->
+        <laylib.version>0.4.1-SNAPSHOT</laylib.version>
+        <fastutil.version>8.5.15</fastutil.version>
+    </properties>
+    
+    <profiles>
+        <profile>
+            <id>release</id>
+            <distributionManagement>
+                <repository>
+                    <id>lauriichan</id>
+                    <name>Lauriichan Maven Repository (Release)</name>
+                    <url>https://maven.lauriichan.me/release</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
+    
+    <repositories>
+        <repository>
+            <id>lauriichan-release</id>
+            <name>Lauriichan Maven Repository</name>
+            <url>https://maven.lauriichan.me/release</url>
+        </repository>
+        <repository>
+            <id>lauriichan-snapshot</id>
+            <name>Lauriichan Maven Repository</name>
+            <url>https://maven.lauriichan.me/snapshot</url>
+        </repository>
+    </repositories>
+    
+    <dependencies>
+
+        <!-- Laylib -->
+        <dependency>
+            <groupId>me.lauriichan.laylib</groupId>
+            <artifactId>json</artifactId>
+            <version>${laylib.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>me.lauriichan.laylib</groupId>
+            <artifactId>localization</artifactId>
+            <version>${laylib.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>me.lauriichan.laylib</groupId>
+            <artifactId>reflection</artifactId>
+            <version>${laylib.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>me.lauriichan.laylib</groupId>
+            <artifactId>logger</artifactId>
+            <version>${laylib.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>me.lauriichan.laylib</groupId>
+            <artifactId>command</artifactId>
+            <version>${laylib.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>it.unimi.dsi</groupId>
+            <artifactId>fastutil</artifactId>
+            <version>${fastutil.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>me.lauriichan.maven</groupId>
+            <artifactId>maven-source-modification-plugin</artifactId>
+            <version>${maven-source-plugin.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <!-- Testing -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.11.1</version>
+			<scope>test</scope>
+		</dependency>
+	    <dependency>
+	        <groupId>org.junit.jupiter</groupId>
+	        <artifactId>junit-jupiter-engine</artifactId>
+	        <version>5.11.1</version>
+	        <scope>test</scope>
+	    </dependency>
+    </dependencies>
+    <modules>
+    	<module>snowframe-core</module>
+    	<module>snowframe-signal</module>
+    	<module>snowframe-config</module>
+    	<module>snowframe-io</module>
+    	<module>snowframe-util-nbt</module>
+    	<module>snowframe-util-http</module>
+    	<module>snowframe-data</module>
+    	<module>snowframe-pulsar</module>
+    	<module>snowframe-imgui</module>
+    </modules>
+</project>
