@@ -96,7 +96,7 @@ public class BlockingTicker {
             long prevNanoTime = System.nanoTime();
             long nanoTime = prevNanoTime;
             long delta = 0;
-            long elapsed = 0;
+            long elapsed = 0, elapsedMin = 0;
             int counter = 0;
             int secondTick = 0;
             int secondCounter = 0;
@@ -126,6 +126,7 @@ public class BlockingTicker {
                             secondTick = 0;
                         }
                     }
+                    counter++;
                     delta = nanoTime - System.nanoTime();
                     nextLength = this.length;
                     tickMillis = TimeUnit.NANOSECONDS.toMillis(nextLength - delta);
