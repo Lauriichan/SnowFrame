@@ -6,6 +6,7 @@ import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.snowframe.DataModule;
 import me.lauriichan.snowframe.SnowFrame;
 import me.lauriichan.snowframe.data.IDataHandler.Wrapper;
+import me.lauriichan.snowframe.extension.Order;
 import me.lauriichan.snowframe.resource.source.IDataSource;
 
 public final class DataWrapper<T, D extends IFileDataExtension<T>> implements IDataWrapper<T, D> {
@@ -33,14 +34,16 @@ public final class DataWrapper<T, D extends IFileDataExtension<T>> implements ID
         return state == FAIL_DATA_LOAD || state == FAIL_DATA_PROPERGATE || state == FAIL_DATA_MIGRATE || state == FAIL_DATA_SAVE;
     }
     
-    public static <T, D extends ISingleDataExtension<T>> DataWrapper<T, D> single(final SnowFrame<?> app, final D extension) {
-        return new DataWrapper<>(app, extension, extension.path());
+    public static <T, D extends ISingleDataExtension<T>> DataWrapper<T, D> single(final SnowFrame<?> frame, final D extension) {
+        return new DataWrapper<>(frame, extension, extension.path());
     }
 
     private final ISimpleLogger logger;
     private final DataMigrator migrator;
 
     private final String path;
+    
+    private final int order;
     
     private final D data;
     private final Class<D> dataType;
@@ -51,14 +54,21 @@ public final class DataWrapper<T, D extends IFileDataExtension<T>> implements ID
     private volatile long lastTimeModified = -1L;
     
     @SuppressWarnings("unchecked")
-    public DataWrapper(final SnowFrame<?> app, final D extension, final String path) {
-        this.logger = app.logger();
-        this.migrator = app.module(DataModule.class).migrator();
+    public DataWrapper(final SnowFrame<?> frame, final D extension, final String path) {
+        this.logger = frame.logger();
+        this.migrator = frame.module(DataModule.class).migrator();
         this.path = path;
         this.data = Objects.requireNonNull(extension, "Data extension can't be null");
         this.dataType = (Class<D>) data.getClass();
-        this.source = Objects.requireNonNull(app.resource(path), "Couldn't find data source at '" + path + "'");
+        this.source = Objects.requireNonNull(frame.resource(path), "Couldn't find data source at '" + path + "'");
         this.handler = Objects.requireNonNull(extension.handler(), "Data handler can't be null");
+        Order order = dataType.getAnnotation(Order.class);
+        this.order = order == null ? 0 : order.value();
+    }
+    
+    @Override
+    public int order() {
+        return order;
     }
 
     @Override

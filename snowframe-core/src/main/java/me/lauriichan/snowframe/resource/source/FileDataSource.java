@@ -55,6 +55,11 @@ public final class FileDataSource implements IDataSource {
     public String name() {
         return file.getName();
     }
+    
+    @Override
+    public String getPath() {
+        return file.getAbsolutePath();
+    }
 
     @Override
     public FileDataSource resolve(String path) {

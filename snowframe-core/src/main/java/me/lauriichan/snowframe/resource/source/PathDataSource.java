@@ -65,6 +65,11 @@ public final class PathDataSource implements IDataSource {
     }
 
     @Override
+    public String getPath() {
+        return path.toAbsolutePath().toString();
+    }
+    
+    @Override
     public PathDataSource resolve(String path) {
         return new PathDataSource(this.path.resolve(path));
     }

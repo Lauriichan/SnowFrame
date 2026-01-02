@@ -10,6 +10,6 @@ public interface IMultiDataExtension<K, E, T, D extends IFileDataExtension<T>> e
 
     String path(E element);
     
-    D create(E element);
+    D create();
     
 }

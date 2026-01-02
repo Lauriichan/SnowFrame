@@ -10,11 +10,11 @@ public final class MultiDataWrapper<K, E, T, D extends IFileDataExtension<T>, M 
 
     private final Object2ObjectArrayMap<K, DataWrapper<T, D>> data = new Object2ObjectArrayMap<>();
 
-    private final SnowFrame<?> app;
+    private final SnowFrame<?> frame;
     private final M extension;
 
-    public MultiDataWrapper(SnowFrame<?> app, M extension) {
-        this.app = app;
+    public MultiDataWrapper(SnowFrame<?> frame, M extension) {
+        this.frame = frame;
         this.extension = extension;
     }
 
@@ -26,14 +26,14 @@ public final class MultiDataWrapper<K, E, T, D extends IFileDataExtension<T>, M 
         K key = extension.getDataKey(Objects.requireNonNull(element));
         DataWrapper<T, D> wrapper = data.get(key);
         if (wrapper == null) {
-            wrapper = new DataWrapper<>(app, extension.create(element), extension.path(element));
+            wrapper = new DataWrapper<>(frame, extension.create(), extension.path(element));
             wrapper.reload();
             data.put(key, wrapper);
         }
         return wrapper;
     }
     
-    public D data(E element) {
+    public D config(E element) {
         DataWrapper<T, D> wrapper = wrapper(element);
         if (wrapper == null) {
             return null;
@@ -41,7 +41,7 @@ public final class MultiDataWrapper<K, E, T, D extends IFileDataExtension<T>, M 
         return wrapper.data();
     }
     
-    public D dataOrCreate(E element) {
+    public D configOrCreate(E element) {
         return wrapperOrCreate(element).data();
     }
     

@@ -17,15 +17,15 @@ public final class DataManager {
 
     private final Object2ObjectArrayMap<Class<? extends IDirectoryDataExtension>, DirectoryDataWrapper<?, ?>> directoryData = new Object2ObjectArrayMap<>();
 
-    public DataManager(final SnowFrame<?> app) {
-        app.extension(ISingleDataExtension.class, true).callInstances(extension -> {
-            data.put(extension.getClass(), DataWrapper.single(app, extension));
+    public DataManager(final SnowFrame<?> frame) {
+        frame.extension(ISingleDataExtension.class, true).callInstances(extension -> {
+            data.put(extension.getClass(), DataWrapper.single(frame, extension));
         });
-        app.extension(IMultiDataExtension.class, true).callInstances(extension -> {
-            multiData.put(extension.getClass(), new MultiDataWrapper<>(app, extension));
+        frame.extension(IMultiDataExtension.class, true).callInstances(extension -> {
+            multiData.put(extension.getClass(), new MultiDataWrapper<>(frame, extension));
         });
-        app.extension(IDirectoryDataExtension.class, true).callInstances(extension -> {
-            directoryData.put(extension.getClass(), DirectoryDataWrapper.create(app, extension));
+        frame.extension(IDirectoryDataExtension.class, true).callInstances(extension -> {
+            directoryData.put(extension.getClass(), DirectoryDataWrapper.create(frame, extension));
         });
     }
 
@@ -59,6 +59,7 @@ public final class DataManager {
         return Stream
             .concat(Stream.concat(data.values().stream(), multiData.values().stream().flatMap(config -> config.wrappers().stream())),
                 directoryData.values().stream())
+            .sorted(IDataWrapper.ORDER_WRAPPER)
             .collect(ObjectArrayList.toList());
     }
 

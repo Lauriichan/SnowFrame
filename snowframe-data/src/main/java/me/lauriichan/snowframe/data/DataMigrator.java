@@ -30,16 +30,16 @@ public final class DataMigrator {
 
     private final Object2ObjectArrayMap<Class<? extends IDataExtension<?>>, Migration> migrations = new Object2ObjectArrayMap<>();
 
-    public DataMigrator(final SnowFrame<?> app) {
+    public DataMigrator(final SnowFrame<?> frame) {
         Object2ObjectArrayMap<Class<? extends IDataExtension<?>>, ObjectArrayList<DataMigrationExtension<?, ?>>> tmpMigrations = new Object2ObjectArrayMap<>();
-        app.extension(DataMigrationExtension.class, true).callInstances(extension -> {
+        frame.extension(DataMigrationExtension.class, true).callInstances(extension -> {
             Class<?> target = extension.targetType();
             if (target == null) {
-                app.logger().warning("Couldn't register migration as it doesn't define a target: {0}", extension.getClass().getName());
+                frame.logger().warning("Couldn't register migration as it doesn't define a target: {0}", extension.getClass().getName());
                 return;
             }
             if (extension.minVersion() < 0 || extension.minVersion() >= extension.targetVersion()) {
-                app.logger().warning(
+                frame.logger().warning(
                     "Couldn't register migration as the min and/or target version are invalid: {0} (min: {1}, target: {2})",
                     extension.getClass().getName(), extension.minVersion(), extension.targetVersion());
                 return;

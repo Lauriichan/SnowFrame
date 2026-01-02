@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 
 public interface IDataSource {
 
@@ -52,6 +53,13 @@ public interface IDataSource {
      * @return the source object
      */
     Object getSource();
+    
+    /**
+     * Gets the relative path of this object
+     * 
+     * @return the relative path
+     */
+    String getPath();
     
     /**
      * Gets the name of the source target
@@ -121,6 +129,19 @@ public interface IDataSource {
     }
 
     /**
+     * Open a buffered writer for the source
+     * 
+     * @param  charset     the charset to use
+     * 
+     * @return             the buffered writer
+     * 
+     * @throws IOException if an I/O error occurs
+     */
+    default BufferedWriter openWriter(Charset charset) throws IOException {
+        return new BufferedWriter(new OutputStreamWriter(openWritableStream(), charset));
+    }
+
+    /**
      * Checks if the data source can be read from
      * 
      * @return @{code true} if the source can be read from otherwise @{code false}
@@ -149,6 +170,19 @@ public interface IDataSource {
      */
     default BufferedReader openReader() throws IOException {
         return new BufferedReader(new InputStreamReader(openReadableStream()));
+    }
+
+    /**
+     * Open a buffered reader for the source
+     * 
+     * @param  charset     the charset to use
+     * 
+     * @return             the buffered reader
+     * 
+     * @throws IOException if an I/O error occurs
+     */
+    default BufferedReader openReader(Charset charset) throws IOException {
+        return new BufferedReader(new InputStreamReader(openReadableStream(), charset));
     }
 
 }
