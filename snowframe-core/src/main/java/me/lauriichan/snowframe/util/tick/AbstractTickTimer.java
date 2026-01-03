@@ -1,39 +1,35 @@
 package me.lauriichan.snowframe.util.tick;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractTickTimer {
 
-    private static final long MIN_IN_NANOS = TimeUnit.MINUTES.toNanos(1);
-    private static final long SEC_IN_NANOS = TimeUnit.SECONDS.toNanos(1);
-    private static final long MILLI_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(1);
-
     private final AtomicInteger state = new AtomicInteger(0);
 
     private volatile Thread timerThread;
-    private volatile int tps;
-    private volatile int tpm;
 
-    private volatile long length = MILLI_IN_NANOS * 50L;
-    private volatile long pauseLength = MILLI_IN_NANOS * 250L;
-    
     private volatile String name = null;
     private volatile boolean daemon = true;
-    
+
+    private final TimeSync sync = new TimeSync();
+
+    public final TimeSync sync() {
+        return sync;
+    }
+
     public final void setName(final String name) {
         this.name = name;
         updateName();
     }
-    
+
     public final String getName() {
         return name;
     }
-    
+
     public final boolean hasName() {
         return name != null;
     }
-    
+
     private final void updateName() {
         Thread thread = this.timerThread;
         String name = this.name;
@@ -42,7 +38,7 @@ public abstract class AbstractTickTimer {
         }
         thread.setName("TickTimer - " + name);
     }
-    
+
     public final void setDaemon(boolean daemon) {
         if (this.daemon == daemon) {
             return;
@@ -50,11 +46,11 @@ public abstract class AbstractTickTimer {
         this.daemon = daemon;
         updateDaemon();
     }
-    
+
     public final boolean isDaemon() {
         return daemon;
     }
-    
+
     private final void updateDaemon() {
         Thread thread = this.timerThread;
         boolean daemon = this.daemon;
@@ -62,30 +58,6 @@ public abstract class AbstractTickTimer {
             return;
         }
         thread.setDaemon(daemon);
-    }
-
-    public final void setPauseLength(final long pauseLength, final TimeUnit unit) {
-        this.pauseLength = Math.max(unit.toNanos(pauseLength), MILLI_IN_NANOS * 10L);
-    }
-
-    public final long getPauseLength() {
-        return pauseLength;
-    }
-
-    public final void setLength(final long length, final TimeUnit unit) {
-        this.length = Math.max(unit.toNanos(length), MILLI_IN_NANOS);
-    }
-
-    public final long getLength() {
-        return length;
-    }
-
-    public final int getTicksPerMinute() {
-        return tpm;
-    }
-
-    public final int getTicksPerSecond() {
-        return tps;
     }
 
     public final boolean isAlive() {
@@ -123,57 +95,19 @@ public abstract class AbstractTickTimer {
     }
 
     private final void tickThread() {
-        long nextLength = this.length;
-        long tickMillis;
-        int tickNanos;
-        long cycles;
-        long prevNanoTime = System.nanoTime();
-        long nanoTime = prevNanoTime;
-        long delta = 0;
-        long elapsed = 0, elapsedMin = 0;
-        int counter = 0;
-        int secondCounter = 0;
         int currentState;
         while (true) {
             if ((currentState = state.get()) == 0) {
                 break;
             }
-            try {
-                if (currentState == 2) {
-                    Thread.sleep(this.pauseLength);
-                    continue;
-                }
-                prevNanoTime = nanoTime;
-                nanoTime = System.nanoTime();
-                delta = nanoTime - prevNanoTime;
-                elapsed += delta;
-                tick(delta);
-                if (elapsed >= SEC_IN_NANOS) {
-                    elapsed = SEC_IN_NANOS - elapsed;
-                    this.tps = counter;
-                    secondCounter += counter;
-                    counter = 0;
-                }
-                if (elapsedMin >= MIN_IN_NANOS) {
-                    elapsedMin = MIN_IN_NANOS - elapsedMin;
-                    this.tpm = secondCounter + counter;
-                    secondCounter = 0;
-                }
-                counter++;
-                delta = nanoTime - System.nanoTime();
-                nextLength = this.length;
-                tickMillis = TimeUnit.NANOSECONDS.toMillis(nextLength - delta);
-                tickNanos = (int) (nextLength - delta - TimeUnit.MILLISECONDS.toNanos(tickMillis));
-                if (tickMillis > 2) {
-                    Thread.sleep(tickMillis, tickNanos);
-                    continue;
-                }
-                cycles = (TimeUnit.MILLISECONDS.toNanos(tickMillis) + tickNanos) / 2;
-                while (cycles-- >= 0) {
-                    Thread.yield();
-                }
-            } catch (final InterruptedException e) {
+            if (currentState == 2) {
+                sync.pauseTick();
                 continue;
+            }
+            try {
+                tick(sync.newTick());
+            } finally {
+                sync.endTick();
             }
         }
     }

@@ -298,6 +298,9 @@ public class ImGUIModule implements ISnowFrameModule {
         scrollDeltaY = (float) (previousScrollOffsetY - scrollOffsetY);
         previousScrollOffsetX = scrollOffsetX;
         previousScrollOffsetY = scrollOffsetY;
+        
+        // Pull GLFW Events before rendering
+        GLFW.glfwPollEvents();
 
         // Start Frame
         clearBuffer();
@@ -322,7 +325,6 @@ public class ImGUIModule implements ISnowFrameModule {
             GLFW.glfwMakeContextCurrent(backupCurrentContext);
         }
         GLFW.glfwSwapBuffers(windowPointer);
-        GLFW.glfwPollEvents();
 
     }
 
