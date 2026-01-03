@@ -159,6 +159,9 @@ public final class SnowFrame<T extends ISnowFrameApp<T>> {
         throws IOException {
         IDataSource internal = resourceManager.resolve(internalPath);
         IDataSource external = resourceManager.resolve(externalPath);
+        if (!internal.exists()) {
+            return external;
+        }
         transferOutside(internal, external, forceSameContents);
         return external;
     }
