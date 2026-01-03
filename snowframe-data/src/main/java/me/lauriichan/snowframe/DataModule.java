@@ -19,8 +19,10 @@ public class DataModule implements ISnowFrameModule {
         LifecycleChainBuilder<?> chainBuilder = builder.startupChain();
         if (chainBuilder.has("config")) {
             chainBuilder.newPhaseAfter("config", "data", false);
+            chainBuilder.newPhaseAfter("reload_config", "reload_data", false);
         } else {
             chainBuilder.newPhaseAfter("load", "data", false);
+            chainBuilder.newPhaseAfter("data", "reload_data", false);
         }
     }
 
@@ -29,6 +31,8 @@ public class DataModule implements ISnowFrameModule {
         lifecycle.startupChain().register("data", Stage.MAIN, (snowFrame) -> {
             migrator = new DataMigrator(snowFrame);
             manager = new DataManager(snowFrame);
+        }).register("reload_data", Stage.MAIN, (snowFrame) -> {
+            manager.reload();
         });
     }
 

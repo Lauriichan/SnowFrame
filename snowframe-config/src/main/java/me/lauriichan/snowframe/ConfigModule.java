@@ -15,7 +15,7 @@ public class ConfigModule implements ISnowFrameModule {
 
     @Override
     public void setupLifecycle(LifecycleBuilder<?> builder) {
-        builder.startupChain().newPhaseAfter("io", "config", false);
+        builder.startupChain().newPhaseAfter("io", "config", false).newPhaseAfter("config", "reload_config", false);
     }
 
     @Override
@@ -23,6 +23,8 @@ public class ConfigModule implements ISnowFrameModule {
         lifecycle.startupChain().register("config", Stage.MAIN, (snowFrame) -> {
             migrator = new ConfigMigrator(snowFrame);
             manager = new ConfigManager(snowFrame);
+        }).register("reload_config", Stage.MAIN, (snowFrame) -> {
+            manager.reload();
         });
     }
 
