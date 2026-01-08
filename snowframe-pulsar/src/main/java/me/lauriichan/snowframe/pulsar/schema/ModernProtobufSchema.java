@@ -24,8 +24,11 @@ public final class ModernProtobufSchema<T> extends AvroBaseStructSchema<T> {
 
     private static record ProtoProperty(String name, ProtobufProperty property) {}
 
-    private ModernProtobufSchema(SchemaInfo schemaInfo) {
+    private ModernProtobufSchema(Class<T> type, SchemaInfo schemaInfo) {
         super(schemaInfo);
+        ModernProtobufIO<T> io = new ModernProtobufIO<>(type);
+        setReader(io);
+        setWriter(io);
     }
 
     public static <T> ModernProtobufSchema<T> of(Class<T> clazz) {
@@ -66,7 +69,7 @@ public final class ModernProtobufSchema<T> extends AvroBaseStructSchema<T> {
         } catch (JsonProcessingException var4) {
             throw new RuntimeException(var4);
         }
-        return new ModernProtobufSchema<T>(
+        return new ModernProtobufSchema<T>(clazz,
             SchemaInfoImpl.builder().schema(ModernProtobufData.INSTANCE.get(clazz).toString().getBytes(StandardCharsets.UTF_8))
                 .type(SchemaType.PROTOBUF).name(name).properties(allProperties).build());
     }
