@@ -78,12 +78,14 @@ public final class HexParser {
     public static void appendHex(StringBuilder builder, int value, int minDigits) {
         minDigits = Math.clamp(minDigits, 0, 12);
         int tmp, count = 0;
+        StringBuilder hex = new StringBuilder();
         while (value != 0 || count < minDigits) {
             tmp = value & 0xF;
             value = value >> 4;
-            builder.append(HEX_DIGITS[tmp]);
+            hex.insert(0, HEX_DIGITS[tmp]);
             count++;
         }
+        builder.append(hex);
     }
 
     /**
@@ -104,11 +106,13 @@ public final class HexParser {
     public static void appendHex(StringBuilder builder, long value, int minDigits) {
         minDigits = Math.clamp(minDigits, 0, 24);
         int tmp, count = 0;
+        StringBuilder hex = new StringBuilder();
         while (value != 0 || count++ < minDigits) {
             tmp = (int) (value & 0xF);
             value = value >> 4;
-            builder.append(HEX_DIGITS[tmp]);
+            hex.insert(0, HEX_DIGITS[tmp]);
         }
+        builder.append(hex);
     }
 
     /**
