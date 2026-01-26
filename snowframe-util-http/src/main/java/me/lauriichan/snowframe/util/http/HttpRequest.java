@@ -240,12 +240,13 @@ public final class HttpRequest {
             OutputStream stream = connection.getOutputStream();
             int bufferSize, sent = 0;
             while ((length - sent) > 0) {
+                uploadListener.progress(sent, length);
                 bufferSize = Math.min(length - sent, 32768);
                 stream.write(data, sent, bufferSize);
                 stream.flush();
                 sent += bufferSize;
-                uploadListener.progress(sent, length);
             }
+            uploadListener.progress(sent, length);
             stream.close();
         }
 
@@ -267,9 +268,9 @@ public final class HttpRequest {
                     tmp = Math.min(maxBytes, buf.length);
                 }
                 while (tmp != 0 && (length = stream.read(buf, 0, tmp)) != -1) {
+                    downloadListener.progress(buffer.length, maxBytes);
                     buffer.write(buf, 0, length);
                     if (maxBytes != -1) {
-                        downloadListener.progress(buffer.length, maxBytes);
                         tmp = Math.min(maxBytes - buffer.length, buf.length);
                     }
                 }
