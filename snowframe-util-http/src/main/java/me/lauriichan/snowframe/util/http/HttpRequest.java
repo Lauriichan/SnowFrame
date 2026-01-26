@@ -56,16 +56,18 @@ public final class HttpRequest {
         return downloadListener;
     }
     
-    public void downloadListener(IHttpProgressListener downloadListener) {
+    public HttpRequest downloadListener(IHttpProgressListener downloadListener) {
         this.downloadListener = downloadListener == null ? NOOP : downloadListener;
+        return this;
     }
     
     public IHttpProgressListener uploadListener() {
         return uploadListener;
     }
     
-    public void uploadListener(IHttpProgressListener uploadListener) {
+    public HttpRequest uploadListener(IHttpProgressListener uploadListener) {
         this.uploadListener = uploadListener == null ? NOOP : uploadListener;
+        return this;
     }
 
     public IHttpAuthenticator authenticator() {
