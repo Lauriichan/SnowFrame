@@ -78,7 +78,7 @@ public abstract class AbstractTickTimer {
             return;
         }
         state.compareAndSet(0, 1);
-        timerThread = new Thread(this::tickThread);
+        timerThread = createThread(this::tickThread);
         updateName();
         updateDaemon();
         timerThread.start();
@@ -111,6 +111,8 @@ public abstract class AbstractTickTimer {
             }
         }
     }
+    
+    protected abstract Thread createThread(Runnable runnable);
 
     protected abstract void tick(long delta);
 

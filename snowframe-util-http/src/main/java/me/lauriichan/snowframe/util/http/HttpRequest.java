@@ -15,11 +15,15 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import me.lauriichan.snowframe.util.http.type.HttpContentType;
 
 public final class HttpRequest {
+    
+    private static final IHttpProgressListener NOOP = (_1, _2) -> {};
 
     private final Object2ObjectArrayMap<String, String> headers = new Object2ObjectArrayMap<>();
     private final Object2ObjectArrayMap<String, String> parameters = new Object2ObjectArrayMap<>();
 
     private volatile IHttpAuthenticator authenticator;
+    private volatile IHttpProgressListener uploadListener = NOOP;
+    private volatile IHttpProgressListener downloadListener = NOOP;
 
     private volatile String url;
     private volatile HttpMethod method = HttpMethod.GET;
@@ -46,6 +50,22 @@ public final class HttpRequest {
     public HttpRequest method(HttpMethod method) {
         this.method = Objects.requireNonNull(method);
         return this;
+    }
+    
+    public IHttpProgressListener downloadListener() {
+        return downloadListener;
+    }
+    
+    public void downloadListener(IHttpProgressListener downloadListener) {
+        this.downloadListener = downloadListener == null ? NOOP : downloadListener;
+    }
+    
+    public IHttpProgressListener uploadListener() {
+        return uploadListener;
+    }
+    
+    public void uploadListener(IHttpProgressListener uploadListener) {
+        this.uploadListener = uploadListener == null ? NOOP : uploadListener;
     }
 
     public IHttpAuthenticator authenticator() {
@@ -154,6 +174,8 @@ public final class HttpRequest {
     }
 
     public <T> HttpResponse<T> call(HttpContentType<T> responseType, HttpContentType<T> contentType, T content) throws IOException {
+        IHttpProgressListener downloadListener = this.downloadListener;
+        IHttpProgressListener uploadListener = this.uploadListener;
         String url = this.url;
         if (url == null || url.isBlank()) {
             throw new IllegalArgumentException("Invalid url: " + url);
@@ -161,6 +183,7 @@ public final class HttpRequest {
         if (responseType == null) {
             throw new IllegalArgumentException("Invalid response type");
         }
+
 
         if (!parameters.isEmpty()) {
             UrlEncoder encoder = UrlEncoder.UTF_8;
@@ -213,8 +236,14 @@ public final class HttpRequest {
 
         if (length != 0) {
             OutputStream stream = connection.getOutputStream();
-            stream.write(data, 0, length);
-            stream.flush();
+            int bufferSize, sent = 0;
+            while ((length - sent) > 0) {
+                bufferSize = Math.min(length - sent, 32768);
+                stream.write(data, sent, bufferSize);
+                stream.flush();
+                sent += bufferSize;
+                uploadListener.progress(sent, length);
+            }
             stream.close();
         }
 
@@ -238,11 +267,13 @@ public final class HttpRequest {
                 while (tmp != 0 && (length = stream.read(buf, 0, tmp)) != -1) {
                     buffer.write(buf, 0, length);
                     if (maxBytes != -1) {
+                        downloadListener.progress(buffer.length, maxBytes);
                         tmp = Math.min(maxBytes - buffer.length, buf.length);
                     }
                 }
                 data = buffer.array;
                 length = buffer.length;
+                downloadListener.progress(length, length);
             }
         }
 

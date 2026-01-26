@@ -98,8 +98,9 @@ public final class SimpleColor {
         return alpha;
     }
 
-    public void alpha(double alpha) {
+    public SimpleColor alpha(double alpha) {
         this.alpha = alpha;
+        return this;
     }
 
     public int redInt() {
@@ -110,8 +111,9 @@ public final class SimpleColor {
         return components[0];
     }
 
-    public void red(double red) {
+    public SimpleColor red(double red) {
         components[0] = red;
+        return this;
     }
 
     public int greenInt() {
@@ -122,8 +124,9 @@ public final class SimpleColor {
         return components[1];
     }
 
-    public void green(double green) {
+    public SimpleColor green(double green) {
         components[1] = green;
+        return this;
     }
 
     public int blueInt() {
@@ -134,8 +137,9 @@ public final class SimpleColor {
         return components[2];
     }
 
-    public void blue(double blue) {
+    public SimpleColor blue(double blue) {
         components[2] = blue;
+        return this;
     }
 
     public int asABGR() {

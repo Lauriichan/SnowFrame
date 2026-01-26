@@ -1,5 +1,7 @@
 package me.lauriichan.snowframe.util.tick;
 
+import java.util.concurrent.ThreadFactory;
+
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 public class SimpleTickTimer extends AbstractTickTimer {
@@ -11,6 +13,15 @@ public class SimpleTickTimer extends AbstractTickTimer {
     }
 
     private final ObjectArrayList<ITickable> tickables = new ObjectArrayList<>();
+    private final ThreadFactory factory;
+    
+    public SimpleTickTimer() {
+        this(Thread.ofVirtual().factory());
+    }
+    
+    public SimpleTickTimer(final ThreadFactory factory) {
+        this.factory = factory;
+    }
     
     public SimpleTickTimer add(ITickable tickable) {
         if (tickable == null || tickables.contains(tickable)) {
@@ -27,6 +38,11 @@ public class SimpleTickTimer extends AbstractTickTimer {
     public SimpleTickTimer clear() {
         tickables.clear();
         return this;
+    }
+
+    @Override
+    protected Thread createThread(Runnable runnable) {
+        return factory.newThread(runnable);
     }
 
     @Override

@@ -12,6 +12,7 @@ public final class TimeSync {
 
     private volatile int tpsCounter = 0, tpmCounter = 0;
     private volatile int tps = -1, tpm = -1;
+    private volatile long lastTickLength = 0;
 
     private long nextLength;
     private long time, prevTime;
@@ -50,6 +51,7 @@ public final class TimeSync {
 
     public final void endTick() {
         tpsCounter++;
+        lastTickLength = (System.nanoTime() - time);
         spin(length);
     }
 
@@ -114,6 +116,10 @@ public final class TimeSync {
             return tpsCounter + tpmCounter;
         }
         return tpm;
+    }
+    
+    public final long lastTickLength() {
+        return lastTickLength;
     }
 
 }
