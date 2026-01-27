@@ -39,14 +39,14 @@ public final class Lifecycle<T extends ISnowFrameApp<T>> {
     public boolean execute(String chainName) {
         LifecycleChain<T> chain = chainOrThrow(chainName);
         chainName = chain.name();
-        snowFrame.logger().debug("Executing lifecycle chain '{0}'...", chainName);
+        snowFrame.logger().track("Executing lifecycle chain '{0}'...", chainName);
         for (LifecyclePhase<T> phase : chain.phases()) {
             if (!phase.execute(chainName, snowFrame)) {
-                snowFrame.logger().debug("Failed to execute lifecycle chain '{0}'!", chainName);
+                snowFrame.logger().track("Failed to execute lifecycle chain '{0}'!", chainName);
                 return false;
             }
         }
-        snowFrame.logger().debug("Successfully executed lifecycle chain '{0}'", chainName);
+        snowFrame.logger().track("Successfully executed lifecycle chain '{0}'", chainName);
         return true;
     }
 
