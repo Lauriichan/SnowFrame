@@ -65,17 +65,17 @@ public final class LifecyclePhase<T extends ISnowFrameApp<T>> {
 
     final boolean execute(String chainName, SnowFrame<T> snowFrame) {
         if (listeners.isEmpty()) {
-            snowFrame.logger().debug("Skipping phase '{0}' in chain '{1}'.", name, chainName);
+            snowFrame.logger().track("Skipping phase '{0}' in chain '{1}'.", name, chainName);
             return true;
         }
         ISimpleLogger logger = snowFrame.logger();
         for (Stage stage : STAGES) {
             ReferenceList<IStageExecutor<T>> executors = listeners.get(stage);
             if (executors == null || executors.isEmpty()) {
-                logger.debug("Skipping stage '{0}' of phase '{1}' in chain '{2}'.", stage, name, chainName);
+                logger.track("Skipping stage '{0}' of phase '{1}' in chain '{2}'.", stage, name, chainName);
                 continue;
             }
-            logger.debug("Executing stage '{0}' of phase '{1}' in chain '{2}'...", stage, name, chainName);
+            logger.track("Executing stage '{0}' of phase '{1}' in chain '{2}'...", stage, name, chainName);
             try {
                 for (IStageExecutor<T> executor : executors) {
                     executor.execute(snowFrame);
