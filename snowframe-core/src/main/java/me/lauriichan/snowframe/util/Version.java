@@ -31,7 +31,7 @@ public final class Version implements Comparable<Version> {
                     }
                     throw new IllegalArgumentException("Unsupported character '%s' found at index %s".formatted(ch, i));
                 }
-                if (component == 3) {
+                if (component == 4) {
                     throw new IllegalArgumentException("Too many components");
                 }
                 components[component] = Integer.parseInt(builder.toString());
