@@ -38,6 +38,7 @@ public final class SnowFrame<T extends ISnowFrameApp<T>> {
     }
 
     private final T app;
+    private final SnowFrame<?> parent;
 
     private final File jarFile;
     private final Path jarRoot;
@@ -56,8 +57,9 @@ public final class SnowFrame<T extends ISnowFrameApp<T>> {
     private final IExtensionPool<ISnowFrameModule> modules;
     private final Reference2ReferenceMap<Class<? extends ISnowFrameModule>, ISnowFrameModule> moduleMap;
 
-    SnowFrame(T app, File jarFile, ISimpleLogger logger, IInstanceInvoker baseInvoker) {
+    SnowFrame(T app, SnowFrame<?> parent, File jarFile, ISimpleLogger logger, IInstanceInvoker baseInvoker) {
         this.app = app;
+        this.parent = parent;
 
         this.logger = logger;
         this.invoker = new SimpleInstanceInvoker(baseInvoker);
@@ -85,7 +87,7 @@ public final class SnowFrame<T extends ISnowFrameApp<T>> {
 
         // Build Lifecycle
         LifecycleBuilder<T> builder = Lifecycle.builder();
-        builder.startupChain().newPhase("load", true).newPhase("ready", true);
+        builder.startupChain().newPhase("load", true).newPhase("plugin", true).newPhase("ready", true);
         builder.shutdownChain().newPhase("shutdown", false);
         modules.callInstances(module -> module.setupLifecycle(builder));
         modules.callInstances(module -> module.setupLifecyclePostModule(builder));
@@ -141,6 +143,18 @@ public final class SnowFrame<T extends ISnowFrameApp<T>> {
             }
         }
         return path;
+    }
+    
+    /*
+     * Parent
+     */
+    
+    public boolean hasParent() {
+        return parent != null;
+    }
+    
+    public SnowFrame<?> parent() {
+        return parent;
     }
 
     /*

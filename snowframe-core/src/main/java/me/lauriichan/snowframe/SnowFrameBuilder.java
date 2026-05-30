@@ -12,6 +12,7 @@ public class SnowFrameBuilder<T extends ISnowFrameApp<T>> {
     private final T app;
 
     private File jarFile;
+    private SnowFrame<?> parent;
     private ISimpleLogger logger = SysOutSimpleLogger.INSTANCE;
     private IInstanceInvoker invoker = IInstanceInvoker.DEFAULT;
 
@@ -21,6 +22,11 @@ public class SnowFrameBuilder<T extends ISnowFrameApp<T>> {
 
     public SnowFrameBuilder<T> jarFile(File jarFile) {
         this.jarFile = jarFile;
+        return this;
+    }
+
+    public SnowFrameBuilder<T> parent(SnowFrame<?> parent) {
+        this.parent = parent;
         return this;
     }
 
@@ -35,7 +41,7 @@ public class SnowFrameBuilder<T extends ISnowFrameApp<T>> {
     }
 
     public SnowFrame<T> build() {
-        return new SnowFrame<>(app, jarFile, logger, invoker);
+        return new SnowFrame<>(app, parent, jarFile, logger, invoker);
     }
 
 }

@@ -71,10 +71,22 @@ final class BasicHttpHandler<T> implements HttpHandler {
             }
             exchange.sendResponseHeaders(response.code().code(), length);
             OutputStream stream = exchange.getResponseBody();
-            stream.write(data);
+            stream.write(data, 0, length);
             stream.flush();
+        } catch (Throwable exp) {
+            if (logger != null) {
+                logger.error("Failed to handle request", exp);
+                exchange.close();
+            }
         } finally {
-            exchange.close();
+            try {
+                exchange.getResponseBody().close();
+            } catch (IOException exp) {
+                if (logger != null) {
+                    logger.error("Failed to close request", exp);
+                    exchange.close();
+                }
+            }
         }
     }
 

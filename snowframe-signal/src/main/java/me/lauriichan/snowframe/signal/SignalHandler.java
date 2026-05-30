@@ -16,6 +16,11 @@ public @interface SignalHandler {
      * 
      * @return if the handler receives cancelled signals
      */
-    boolean value() default false;
+    boolean allowCancelled() default false;
+    
+    /**
+     * This value describes sets the priority of the handler
+     */
+    HandlerPriority priority() default HandlerPriority.NORMAL;
 
 }

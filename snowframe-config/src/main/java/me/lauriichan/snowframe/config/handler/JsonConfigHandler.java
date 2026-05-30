@@ -2,6 +2,7 @@ package me.lauriichan.snowframe.config.handler;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.util.Collection;
 import java.util.List;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -129,10 +130,9 @@ public final class JsonConfigHandler implements IConfigHandler {
 
     @SuppressWarnings("unchecked")
     private IJson<?> serialize(final IOManager ioManager, final Object object) throws SerializationException {
-        if (object instanceof List) {
-            List<?> list = (List<?>) object;
+        if (object instanceof Collection<?> collection) {
             final JsonArray array = new JsonArray();
-            for (final Object elem : list) {
+            for (final Object elem : collection) {
                 array.add(serialize(ioManager, elem));
             }
             return array;
