@@ -15,6 +15,7 @@ import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.snowframe.util.http.HttpCode;
 import me.lauriichan.snowframe.util.http.HttpMethod;
 import me.lauriichan.snowframe.util.http.HttpData;
+import me.lauriichan.snowframe.util.http.HttpHeaders;
 import me.lauriichan.snowframe.util.http.type.HttpContentType;
 
 final class BasicHttpHandler<T> implements HttpHandler {
@@ -101,15 +102,16 @@ final class BasicHttpHandler<T> implements HttpHandler {
                 length = buffer.length;
             }
         }
+        HttpHeaders headers = new HttpHeaders(exchange.getRequestHeaders());
         HttpData<T> body;
         try (FastByteArrayInputStream input = new FastByteArrayInputStream(data, 0, length)) {
-            body = new HttpData<>(bodyType.read(input), null);
+            body = new HttpData<>(bodyType.read(headers, input), null);
         } catch (IOException exp) {
             body = new HttpData<>(null, exp);
         }
 
         try {
-            return handler.handle(exchange, exchange.getRemoteAddress().getAddress(), exchange.getRequestHeaders(), new HttpQuery(exchange),
+            return handler.handle(exchange, exchange.getRemoteAddress().getAddress(), headers, new HttpQuery(exchange),
                 body);
         } catch (Exception exception) {
             if (logger != null) {

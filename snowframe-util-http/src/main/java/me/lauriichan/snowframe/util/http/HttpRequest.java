@@ -285,13 +285,14 @@ public final class HttpRequest {
             length = 0;
         }
 
+        HttpHeaders headers = new HttpHeaders(connection.getHeaderFields());
         HttpData<T> responseData;
         try (FastByteArrayInputStream input = new FastByteArrayInputStream(data, 0, length)) {
-            responseData = new HttpData<>(responseType.read(input), null);
+            responseData = new HttpData<>(responseType.read(headers, input), null);
         } catch (IOException exp) {
             responseData = new HttpData<>(null, exp);
         }
-        return new HttpResponse<T>(HttpCode.byCode(connection.getResponseCode()), responseData, connection.getHeaderFields());
+        return new HttpResponse<T>(HttpCode.byCode(connection.getResponseCode()), responseData, headers);
     }
 
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
+import me.lauriichan.snowframe.util.http.HttpHeaders;
 
 final class BinaryContentType extends HttpContentType<byte[]> {
 
@@ -17,7 +18,7 @@ final class BinaryContentType extends HttpContentType<byte[]> {
     }
 
     @Override
-    public byte[] read(FastByteArrayInputStream inputStream) throws IOException {
+    public byte[] read(HttpHeaders headers, FastByteArrayInputStream inputStream) throws IOException {
         byte[] output = new byte[inputStream.length];
         System.arraycopy(inputStream.array, inputStream.offset, output, 0, inputStream.length);
         return output;

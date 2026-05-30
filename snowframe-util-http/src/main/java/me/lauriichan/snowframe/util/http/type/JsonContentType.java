@@ -8,6 +8,7 @@ import me.lauriichan.laylib.json.IJson;
 import me.lauriichan.laylib.json.io.JsonParser;
 import me.lauriichan.laylib.json.io.JsonSyntaxException;
 import me.lauriichan.laylib.json.io.JsonWriter;
+import me.lauriichan.snowframe.util.http.HttpHeaders;
 
 final class JsonContentType extends HttpContentType<IJson<?>> {
 
@@ -23,7 +24,7 @@ final class JsonContentType extends HttpContentType<IJson<?>> {
     }
 
     @Override
-    public IJson<?> read(FastByteArrayInputStream inputStream) throws IOException {
+    public IJson<?> read(HttpHeaders headers, FastByteArrayInputStream inputStream) throws IOException {
         try {
             return JsonParser.fromStream(inputStream);
         } catch (IllegalStateException | JsonSyntaxException e) {

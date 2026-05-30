@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import me.lauriichan.snowframe.util.http.HttpHeaders;
 import me.lauriichan.snowframe.util.http.UrlEncoder;
 
 public final class UrlEncodedContentType extends HttpContentType<Object2ObjectArrayMap<String, String>> {
@@ -41,7 +42,7 @@ public final class UrlEncodedContentType extends HttpContentType<Object2ObjectAr
     }
 
     @Override
-    public Object2ObjectArrayMap<String, String> read(FastByteArrayInputStream inputStream) throws IOException {
+    public Object2ObjectArrayMap<String, String> read(HttpHeaders headers, FastByteArrayInputStream inputStream) throws IOException {
         return readFromString(new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
     }
 
