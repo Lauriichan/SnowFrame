@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -28,10 +29,16 @@ public final class FileLogger extends AbstractSimpleLogger {
     private static final String DEBUG_FORMAT = "[%s][DEBUG/%s] %s";
     private static final String TRACK_FORMAT = "[%s][TRACK/%s] %s";
 
+    private final IDelegateLogger loggerDelegate;
     private final PrintStream fileOut;
     private final File file;
-
+    
     public FileLogger(final File directory) {
+        this(directory, IDelegateLogger.SYS_OUT);
+    }
+
+    public FileLogger(final File directory, final IDelegateLogger loggerDelegate) {
+        this.loggerDelegate = Objects.requireNonNull(loggerDelegate);
         try {
             if (!directory.exists()) {
                 directory.mkdirs();
@@ -75,39 +82,45 @@ public final class FileLogger extends AbstractSimpleLogger {
             System.err.println(StringUtil.stackTraceToString(e));
         }
     }
+    
+    public void print(String format, String message) {
+        message = format.formatted(TIME_FORMATTER.format(LocalTime.now()), Thread.currentThread().getName(), message);
+        loggerDelegate.custom(message);
+        fileOut.println(message);
+    }
 
     @Override
     protected void info(String message) {
         message = INFO_FORMAT.formatted(TIME_FORMATTER.format(LocalTime.now()), Thread.currentThread().getName(), message);
-        System.out.println(message);
+        loggerDelegate.info(message);
         fileOut.println(message);
     }
 
     @Override
     protected void warning(String message) {
         message = WARN_FORMAT.formatted(TIME_FORMATTER.format(LocalTime.now()), Thread.currentThread().getName(), message);
-        System.err.println(message);
+        loggerDelegate.warning(message);
         fileOut.println(message);
     }
 
     @Override
     protected void error(String message) {
         message = ERROR_FORMAT.formatted(TIME_FORMATTER.format(LocalTime.now()), Thread.currentThread().getName(), message);
-        System.err.println(message);
+        loggerDelegate.error(message);
         fileOut.println(message);
     }
 
     @Override
     protected void track(String message) {
         message = TRACK_FORMAT.formatted(TIME_FORMATTER.format(LocalTime.now()), Thread.currentThread().getName(), message);
-        System.out.println(message);
+        loggerDelegate.track(message);
         fileOut.println(message);
     }
 
     @Override
     protected void debug(String message) {
         message = DEBUG_FORMAT.formatted(TIME_FORMATTER.format(LocalTime.now()), Thread.currentThread().getName(), message);
-        System.out.println(message);
+        loggerDelegate.debug(message);
         fileOut.println(message);
     }
 

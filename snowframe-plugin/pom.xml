@@ -7,17 +7,12 @@
 		<artifactId>snowframe-parent</artifactId>
 		<version>0.2.0</version>
 	</parent>
-	<artifactId>snowframe-config</artifactId>
+	<artifactId>snowframe-plugin</artifactId>
 
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>snowframe-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>snowframe-io</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
@@ -39,21 +34,6 @@
 							me.lauriichan.snowframe.extension.processor.ExtensionProcessor</annotationProcessor>
 					</annotationProcessors>
 				</configuration>
-                <executions>
-                    <execution>
-                        <id>compile-processors</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <proc>none</proc>
-                            <includes>
-                                <include>me/lauriichan/snowframe/maven/**.java</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-                </executions>
 			</plugin>
 		</plugins>
 		<resources>

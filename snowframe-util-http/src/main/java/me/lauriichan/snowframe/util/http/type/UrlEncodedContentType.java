@@ -24,6 +24,9 @@ public final class UrlEncodedContentType extends HttpContentType<Object2ObjectAr
     }
 
     public Object2ObjectArrayMap<String, String> readFromString(String string) {
+        if (string == null || string.isBlank()) {
+            return new Object2ObjectArrayMap<>();
+        }
         if (string.startsWith("?")) {
             string = string.substring(1);
         }

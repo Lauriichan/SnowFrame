@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.security.KeyStore;
+import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -209,6 +210,7 @@ public class BasicHttpServer implements AutoCloseable {
             contextSetup.accept(context);
         }
         contexts.put(path, context);
+        logger.debug("Created context for path '{0}' with methods: {1}", path, Arrays.asList(methods));
         return this;
     }
 

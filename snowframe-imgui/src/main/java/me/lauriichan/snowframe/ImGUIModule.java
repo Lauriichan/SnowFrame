@@ -71,7 +71,7 @@ public class ImGUIModule implements ISnowFrameModule {
 
     @Override
     public void setupLifecycle(LifecycleBuilder<?> builder) {
-        builder.chain(STARTUP_CHAIN).newPhase("window", true).newPhase("setup", true).newPhase("start", true);
+        builder.chain(STARTUP_CHAIN).newPhase("window", true).newPhase("setup", true).newPhase("init", true).newPhase("start", true);
         builder.chain(RENDER_CHAIN).newPhase("render", true);
     }
 
@@ -84,7 +84,7 @@ public class ImGUIModule implements ISnowFrameModule {
     public void registerLifecycle(Lifecycle<?> lifecycle) {
         lifecycle.shutdownChain().register("shutdown", Stage.PRE, this::onShutdown).register("dispose", Stage.MAIN, this::onDispose);
         lifecycle.chainOrThrow(STARTUP_CHAIN).register("window", Stage.MAIN, this::onWindow).register("setup", Stage.MAIN, this::onSetup)
-            .register("start", Stage.MAIN, this::onStart);
+            .register("init", Stage.MAIN, this::onInit).register("start", Stage.MAIN, this::onStart);
 
         logger = lifecycle.snowFrame().logger();
         signalManager = lifecycle.snowFrame().module(SignalModule.class).signalManager();
@@ -107,7 +107,7 @@ public class ImGUIModule implements ISnowFrameModule {
         if (dataSource instanceof FileDataSource fileSource) {
             path = fileSource.getSource().toPath();
         } else if (dataSource instanceof PathDataSource pathSource) {
-            path =  pathSource.getSource();
+            path = pathSource.getSource();
         } else {
             throw new IllegalArgumentException("Unsupported IDataSource");
         }
@@ -141,7 +141,7 @@ public class ImGUIModule implements ISnowFrameModule {
     public boolean isRendering() {
         return renderTicker != null && renderTicker.isAlive();
     }
-    
+
     public BlockingTicker renderTicker() {
         return renderTicker;
     }
@@ -230,6 +230,9 @@ public class ImGUIModule implements ISnowFrameModule {
 
     private void onSetup(SnowFrame<?> frame) {
         ImGui.createContext();
+    }
+
+    private void onInit(SnowFrame<?> frame) {
         imGuiGlfw.init(windowPointer, true);
         imGuiGl3.init(glslVersion);
     }
@@ -298,7 +301,7 @@ public class ImGUIModule implements ISnowFrameModule {
         scrollDeltaY = (float) (previousScrollOffsetY - scrollOffsetY);
         previousScrollOffsetX = scrollOffsetX;
         previousScrollOffsetY = scrollOffsetY;
-        
+
         // Pull GLFW Events before rendering
         GLFW.glfwPollEvents();
 

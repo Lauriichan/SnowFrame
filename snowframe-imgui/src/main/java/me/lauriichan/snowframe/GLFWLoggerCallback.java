@@ -12,7 +12,7 @@ import me.lauriichan.laylib.logger.util.StringUtil;
 
 public class GLFWLoggerCallback implements GLFWErrorCallbackI {
 
-    private final Map<Integer, String> errorCodes = APIUtil.apiClassTokens((field, value) -> 0x10000 < value && value < 0x20000, null,
+    private final Map<Integer, String> errorCodes = APIUtil.apiClassTokens((_, value) -> 0x10000 < value && value < 0x20000, null,
         GLFW.class);
 
     protected final ISimpleLogger logger;

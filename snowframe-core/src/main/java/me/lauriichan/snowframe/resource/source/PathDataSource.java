@@ -68,7 +68,7 @@ public final class PathDataSource implements IDataSource {
     public String getPath() {
         return path.toAbsolutePath().toString();
     }
-    
+
     @Override
     public PathDataSource resolve(String path) {
         return new PathDataSource(this.path.resolve(path));
@@ -117,7 +117,8 @@ public final class PathDataSource implements IDataSource {
             throw new UnsupportedOperationException("Path can not be written to");
         }
         ensureCreated();
-        return path.getFileSystem().provider().newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        return path.getFileSystem().provider().newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+            StandardOpenOption.TRUNCATE_EXISTING);
     }
 
     @Override
