@@ -60,10 +60,6 @@ public final class SignalManager {
             lock.writeLock().unlock();
         }
     }
-    
-    public final void appendContainers() {
-        
-    }
 
     public final <S extends ISignal> boolean call(S signal) {
         SignalContext<S> context = new SignalContext<>(signal);

@@ -1,5 +1,6 @@
 package me.lauriichan.snowframe.signal;
 
+//TODO: WIP
 public enum HandlerPriority {
 
     LOWEST(-2),

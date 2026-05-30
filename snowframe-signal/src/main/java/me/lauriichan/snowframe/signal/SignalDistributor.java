@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.lauriichan.laylib.logger.ISimpleLogger;
 
+// TODO: WIP
 public class SignalDistributor {
     
     private final ObjectArrayList<SignalManager> managers = new ObjectArrayList<>();
