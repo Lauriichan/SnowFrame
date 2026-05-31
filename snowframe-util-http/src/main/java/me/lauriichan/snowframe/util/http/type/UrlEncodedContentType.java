@@ -18,7 +18,7 @@ public final class UrlEncodedContentType extends HttpContentType<Object2ObjectAr
     private final UrlEncoder encoder = UrlEncoder.UTF_8;
 
     private UrlEncodedContentType() {
-        super("application/x-www-form-urlencoded", "application/x-www-form-urlencoded", Object2ObjectArrayMap.class);
+        super("application/x-www-form-urlencoded", Object2ObjectArrayMap.class, "application/x-www-form-urlencoded");
         if (URL_ENCODED != null) {
             throw new UnsupportedOperationException("Singleton");
         }

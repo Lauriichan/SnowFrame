@@ -17,7 +17,7 @@ final class JsonContentType extends HttpContentType<IJson<?>> {
     private final JsonWriter writer = new JsonWriter().setPretty(false);
 
     private JsonContentType() {
-        super("application/json", "application/vnd.github.v3+json;application/json", IJson.class);
+        super("application/json", IJson.class, "application/vnd.github.v3+json", "application/json");
         if (JSON != null) {
             throw new UnsupportedOperationException("Singleton");
         }

@@ -12,7 +12,7 @@ final class PlainTextContentType extends HttpContentType<String> {
     public static final PlainTextContentType PLAIN_TEXT = new PlainTextContentType();
 
     private PlainTextContentType() {
-        super("text/plain", "text/*", String.class);
+        super("text/plain", String.class, "text/*");
     }
 
     @Override

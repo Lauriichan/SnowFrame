@@ -11,7 +11,7 @@ final class BinaryContentType extends HttpContentType<byte[]> {
     public static final BinaryContentType BINARY = new BinaryContentType();
 
     private BinaryContentType() {
-        super("application/octet-stream", "*/*", byte[].class);
+        super("application/octet-stream", byte[].class, "*/*");
         if (BINARY != null) {
             throw new UnsupportedOperationException("Singleton");
         }

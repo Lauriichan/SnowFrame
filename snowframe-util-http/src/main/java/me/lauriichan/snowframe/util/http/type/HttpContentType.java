@@ -14,24 +14,35 @@ public abstract class HttpContentType<T> {
 
     public static final HttpContentType<byte[]> BINARY = BinaryContentType.BINARY;
     public static final HttpContentType<IJson<?>> JSON = JsonContentType.JSON;
+    public static final HttpContentType<String> TEXT = PlainTextContentType.PLAIN_TEXT;
     public static final HttpContentType<Object2ObjectArrayMap<String, String>> URL_ENCODED = UrlEncodedContentType.URL_ENCODED;
 
     public static final HttpContentType<MultiFormData> multiFormData(HttpContentType<?>... accepts) {
+        if (accepts == null || accepts.length == 0) {
+            accepts = new HttpContentType[] {
+                URL_ENCODED,
+                JSON,
+                TEXT,
+                BINARY
+            };
+        }
         return new MultiFormDataContentType(accepts);
     }
 
     private final String name, accepts;
+    private final String[] acceptPattern;
     private final Class<? super T> valueType;
 
-    public HttpContentType(String name, String accepts, Class<? super T> valueType) {
+    public HttpContentType(String name, Class<? super T> valueType, String... acceptPattern) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Invalid type name");
         }
-        if (accepts == null || accepts.isBlank()) {
+        if (acceptPattern == null || acceptPattern.length == 0) {
             throw new IllegalArgumentException("Invalid type accepts");
         }
         this.name = name;
-        this.accepts = accepts;
+        this.acceptPattern = acceptPattern;
+        this.accepts = String.join("; ", acceptPattern);
         this.valueType = Objects.requireNonNull(valueType);
     }
 
@@ -43,8 +54,16 @@ public abstract class HttpContentType<T> {
         return accepts;
     }
 
+    public final String[] acceptPattern() {
+        return acceptPattern;
+    }
+
     public final Class<? super T> valueType() {
         return valueType;
+    }
+
+    public final HttpContentType<T> restrict(String... acceptPatterns) {
+        return new RestrictingHttpContentType<>(this, acceptPatterns);
     }
 
     public abstract T read(HttpHeaders headers, FastByteArrayInputStream inputStream) throws IOException;

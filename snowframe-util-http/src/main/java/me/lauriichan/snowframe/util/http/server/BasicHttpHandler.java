@@ -120,6 +120,11 @@ final class BasicHttpHandler<T> implements HttpHandler {
             body = new HttpData<>(bodyType.read(headers, input), null);
         } catch (IOException exp) {
             body = new HttpData<>(null, exp);
+        } catch (RuntimeException exp) {
+            if (logger != null) {
+                logger.error("Failed to handle request", exp);
+            }
+            return Response.of(HttpCode.INTERNAL_SERVER_ERROR);
         }
 
         try {
