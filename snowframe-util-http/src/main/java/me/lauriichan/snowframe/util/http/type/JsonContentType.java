@@ -9,6 +9,7 @@ import me.lauriichan.laylib.json.io.JsonParser;
 import me.lauriichan.laylib.json.io.JsonSyntaxException;
 import me.lauriichan.laylib.json.io.JsonWriter;
 import me.lauriichan.snowframe.util.http.HttpHeaders;
+import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
 
 final class JsonContentType extends HttpContentType<IJson<?>> {
 
@@ -33,7 +34,8 @@ final class JsonContentType extends HttpContentType<IJson<?>> {
     }
 
     @Override
-    public void write(FastByteArrayOutputStream outputStream, IJson<?> value) throws IOException {
+    public void write(IHeaderArgs typeArgs, FastByteArrayOutputStream outputStream, IJson<?> value) throws IOException {
+        typeArgs.set("charset", "utf-8");
         writer.toStream(value, outputStream);
     }
 

@@ -13,6 +13,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.lauriichan.snowframe.util.http.HttpCode;
+import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
 import me.lauriichan.snowframe.util.http.type.HttpContentType;
 
 public final class Response {
@@ -27,8 +28,8 @@ public final class Response {
             this.value = Objects.requireNonNull(value);
         }
         
-        public void write(FastByteArrayOutputStream outputStream) throws IOException {
-            type.write(outputStream, value);
+        public void write(IHeaderArgs args, FastByteArrayOutputStream outputStream) throws IOException {
+            type.write(args, outputStream, value);
         }
     }
     

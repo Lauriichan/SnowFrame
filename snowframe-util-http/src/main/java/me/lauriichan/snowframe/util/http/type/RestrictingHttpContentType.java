@@ -5,6 +5,7 @@ import java.io.IOException;
 import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import me.lauriichan.snowframe.util.http.HttpHeaders;
+import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
 
 final class RestrictingHttpContentType<T> extends HttpContentType<T> {
 
@@ -21,8 +22,8 @@ final class RestrictingHttpContentType<T> extends HttpContentType<T> {
     }
 
     @Override
-    public void write(FastByteArrayOutputStream outputStream, T value) throws IOException {
-        delegate.write(outputStream, value);
+    public void write(IHeaderArgs typeArgs, FastByteArrayOutputStream outputStream, T value) throws IOException {
+        delegate.write(typeArgs, outputStream, value);
     }
 
 }

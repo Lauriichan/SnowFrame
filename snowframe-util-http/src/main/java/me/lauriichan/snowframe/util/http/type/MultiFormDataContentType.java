@@ -10,7 +10,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
 import me.lauriichan.snowframe.util.http.HttpHeaders;
-import me.lauriichan.snowframe.util.http.HttpHeaders.HeaderArgs;
+import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
 import me.lauriichan.snowframe.util.http.data.MultiFormData;
 import me.lauriichan.snowframe.util.http.plexus.SelectorUtils;
 
@@ -61,7 +61,7 @@ final class MultiFormDataContentType extends HttpContentType<MultiFormData> {
             }
             input.mark(0);
             HttpHeaders dataHeaders = parseHeaders(input);
-            HeaderArgs disposition = dataHeaders.getArguments("Content-Disposition");
+            IHeaderArgs disposition = dataHeaders.getArguments("Content-Disposition");
             if (disposition == null || !disposition.hasUnnamed() || !disposition.getUnnamed(0).equalsIgnoreCase("form-data")) {
                 throw new IOException("Invalid multi form data");
             }
@@ -102,7 +102,7 @@ final class MultiFormDataContentType extends HttpContentType<MultiFormData> {
     }
     
     private String rawContentTypeOf(HttpHeaders headers) {
-        HeaderArgs type = headers.getArguments("Content-Type");
+        IHeaderArgs type = headers.getArguments("Content-Type");
         if (type != null && type.hasUnnamed()) {
             return type.getUnnamed(0);
         }
@@ -204,8 +204,8 @@ final class MultiFormDataContentType extends HttpContentType<MultiFormData> {
     }
 
     @Override
-    public void write(FastByteArrayOutputStream outputStream, MultiFormData value) throws IOException {
-
+    public void write(IHeaderArgs typeArgs, FastByteArrayOutputStream outputStream, MultiFormData value) throws IOException {
+        // TODO: Write this
     }
 
 }

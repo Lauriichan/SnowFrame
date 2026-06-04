@@ -5,6 +5,7 @@ import java.io.IOException;
 import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import me.lauriichan.snowframe.util.http.HttpHeaders;
+import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
 
 final class BinaryContentType extends HttpContentType<byte[]> {
 
@@ -25,7 +26,7 @@ final class BinaryContentType extends HttpContentType<byte[]> {
     }
 
     @Override
-    public void write(FastByteArrayOutputStream outputStream, byte[] value) throws IOException {
+    public void write(IHeaderArgs typeArgs, FastByteArrayOutputStream outputStream, byte[] value) throws IOException {
         outputStream.write(value);
     }
 

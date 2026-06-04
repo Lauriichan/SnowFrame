@@ -14,6 +14,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.snowframe.util.http.HttpCode;
 import me.lauriichan.snowframe.util.http.HttpMethod;
+import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
 import me.lauriichan.snowframe.util.http.HttpData;
 import me.lauriichan.snowframe.util.http.HttpHeaders;
 import me.lauriichan.snowframe.util.http.type.HttpContentType;
@@ -54,8 +55,17 @@ final class BasicHttpHandler<T> implements HttpHandler {
             }
             int length = 0;
             byte[] data;
+            HttpHeaders headers = new HttpHeaders(exchange.getResponseHeaders());
+            IHeaderArgs originalArgs = headers.getArguments("Content-Type");
+            IHeaderArgs args;
+            if (originalArgs == null) {
+                args = HttpHeaders.modifiableArgs();
+                args.addUnnamed(content.type().name());
+            } else {
+                args = HttpHeaders.modifiableArgs(originalArgs);
+            }
             try (FastByteArrayOutputStream output = new FastByteArrayOutputStream()) {
-                content.write(output);
+                content.write(args, output);
                 data = output.array;
                 length = output.length;
             } catch (Exception exception) {
@@ -69,6 +79,7 @@ final class BasicHttpHandler<T> implements HttpHandler {
                 exchange.sendResponseHeaders(response.code().code(), -1);
                 return;
             }
+            exchange.getResponseHeaders().set("Content-Type", args.asHeaderValue());
             exchange.sendResponseHeaders(response.code().code(), length);
             OutputStream stream = exchange.getResponseBody();
             stream.write(data, 0, length);
@@ -128,8 +139,7 @@ final class BasicHttpHandler<T> implements HttpHandler {
         }
 
         try {
-            return handler.handle(exchange, exchange.getRemoteAddress().getAddress(), headers, new HttpQuery(exchange),
-                body);
+            return handler.handle(exchange, exchange.getRemoteAddress().getAddress(), headers, new HttpQuery(exchange), body);
         } catch (Exception exception) {
             if (logger != null) {
                 logger.error("Failed to handle request", exception);

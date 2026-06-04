@@ -12,6 +12,7 @@ import java.util.Objects;
 import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
 import me.lauriichan.snowframe.util.http.type.HttpContentType;
 
 public final class HttpRequest {
@@ -224,13 +225,15 @@ public final class HttpRequest {
         int length = 0;
         if (contentType != null) {
             FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
-            contentType.write(outputStream, content);
+            IHeaderArgs args = HttpHeaders.modifiableArgs();
+            args.addUnnamed(contentType.name());
+            contentType.write(args, outputStream, content);
             data = outputStream.array;
             length = outputStream.length;
             if (length != 0) {
                 connection.setDoOutput(true);
                 connection.setFixedLengthStreamingMode(length);
-                connection.setRequestProperty("Content-Type", contentType.name());
+                connection.setRequestProperty("Content-Type", args.asHeaderValue());
             }
         }
 

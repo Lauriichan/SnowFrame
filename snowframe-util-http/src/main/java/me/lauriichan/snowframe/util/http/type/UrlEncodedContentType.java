@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import me.lauriichan.snowframe.util.http.HttpHeaders;
+import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
 import me.lauriichan.snowframe.util.http.UrlEncoder;
 
 public final class UrlEncodedContentType extends HttpContentType<Object2ObjectArrayMap<String, String>> {
@@ -50,7 +51,8 @@ public final class UrlEncodedContentType extends HttpContentType<Object2ObjectAr
     }
 
     @Override
-    public void write(FastByteArrayOutputStream outputStream, Object2ObjectArrayMap<String, String> value) throws IOException {
+    public void write(IHeaderArgs typeArgs, FastByteArrayOutputStream outputStream, Object2ObjectArrayMap<String, String> value) throws IOException {
+        typeArgs.set("charset", "utf-8");
         UrlEncoder encoder = UrlEncoder.UTF_8;
         StringBuilder builder = new StringBuilder();
         for (Object2ObjectArrayMap.Entry<String, String> entry : value.object2ObjectEntrySet()) {

@@ -53,14 +53,14 @@ public interface IDataSource {
      * @return the source object
      */
     Object getSource();
-    
+
     /**
      * Gets the relative path of this object
      * 
      * @return the relative path
      */
     String getPath();
-    
+
     /**
      * Gets the name of the source target
      * 
@@ -69,13 +69,13 @@ public interface IDataSource {
     default String name() {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * Resolves a source relative to this source
      * 
-     * @param path
+     * @param  path
      * 
-     * @return the relative source
+     * @return      the relative source
      */
     default IDataSource resolve(String path) {
         throw new UnsupportedOperationException();
@@ -183,6 +183,21 @@ public interface IDataSource {
      */
     default BufferedReader openReader(Charset charset) throws IOException {
         return new BufferedReader(new InputStreamReader(openReadableStream(), charset));
+    }
+
+    /**
+     * Copies the data of this data source to the target data source
+     * 
+     * @param  targetSource the target source
+     * 
+     * @throws IOException  if an I/O error occurs
+     */
+    default void transferTo(IDataSource targetSource) throws IOException {
+        try (InputStream inputStream = openReadableStream()) {
+            try (OutputStream outputStream = targetSource.openWritableStream()) {
+                inputStream.transferTo(outputStream);
+            }
+        }
     }
 
 }

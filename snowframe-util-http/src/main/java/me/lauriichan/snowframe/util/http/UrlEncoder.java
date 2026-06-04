@@ -39,6 +39,14 @@ public final class UrlEncoder {
         dontNeedEncoding.set('*');
     }
 
+    public static boolean needsEncoding(char ch) {
+        return !dontNeedEncoding.get(ch);
+    }
+
+    public static boolean needsEncoding(CharSequence seq) {
+        return !seq.chars().allMatch(dontNeedEncoding::get);
+    }
+
     private final Charset charset;
 
     private UrlEncoder(Charset charset) {

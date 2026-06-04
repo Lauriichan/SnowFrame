@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import me.lauriichan.snowframe.util.http.HttpHeaders;
+import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
 
 final class PlainTextContentType extends HttpContentType<String> {
 
@@ -21,7 +22,8 @@ final class PlainTextContentType extends HttpContentType<String> {
     }
 
     @Override
-    public void write(FastByteArrayOutputStream outputStream, String value) throws IOException {
+    public void write(IHeaderArgs typeArgs, FastByteArrayOutputStream outputStream, String value) throws IOException {
+        typeArgs.set("charset", "utf-8");
         outputStream.write(value.getBytes(StandardCharsets.UTF_8));
     }
 

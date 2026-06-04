@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import me.lauriichan.laylib.json.IJson;
 import me.lauriichan.snowframe.util.http.HttpHeaders;
+import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
 import me.lauriichan.snowframe.util.http.data.MultiFormData;
 
 public abstract class HttpContentType<T> {
@@ -68,6 +69,6 @@ public abstract class HttpContentType<T> {
 
     public abstract T read(HttpHeaders headers, FastByteArrayInputStream inputStream) throws IOException;
 
-    public abstract void write(FastByteArrayOutputStream outputStream, T value) throws IOException;
+    public abstract void write(IHeaderArgs typeArgs, FastByteArrayOutputStream outputStream, T value) throws IOException;
 
 }
