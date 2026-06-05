@@ -12,7 +12,7 @@
 	<properties>
 		<target.java.version>25</target.java.version>
 	
-        <imgui.version>1.90.0</imgui.version>
+        <imgui.version>1.92.0</imgui.version>
         <lwjgl.version>3.3.6</lwjgl.version>
 	</properties>
 
