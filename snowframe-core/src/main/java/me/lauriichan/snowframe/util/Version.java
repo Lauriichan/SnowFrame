@@ -31,7 +31,7 @@ public final class Version implements Comparable<Version> {
                     }
                     throw new IllegalArgumentException("Unsupported character '%s' found at index %s".formatted(ch, i));
                 }
-                if (component == 4) {
+                if (component >= 4) {
                     throw new IllegalArgumentException("Too many components");
                 }
                 components[component] = Integer.parseInt(builder.toString());
@@ -39,9 +39,16 @@ public final class Version implements Comparable<Version> {
                 if (ch == '.') {
                     component++;
                 } else if (ch == '-') {
-                    component = 3;
+                    if (component < 3) {
+                        component = 3;
+                    } else {
+                        component++;
+                    }
                     minusPreviously = true;
                 }
+            }
+            if (component >= 4) {
+                throw new IllegalArgumentException("Too many components");
             }
             if (!builder.isEmpty()) {
                 components[component] = Integer.parseInt(builder.toString());
@@ -119,7 +126,7 @@ public final class Version implements Comparable<Version> {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(major).append('.').append(minor);
-        if (patch >= -1) {
+        if (patch > -1) {
             builder.append('.').append(patch);
         }
         if (revision > -1) {
