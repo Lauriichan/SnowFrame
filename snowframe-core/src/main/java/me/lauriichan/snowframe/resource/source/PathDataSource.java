@@ -84,6 +84,15 @@ public final class PathDataSource implements IDataSource {
     }
 
     @Override
+    public long size() {
+        try {
+            return Files.size(path);
+        } catch (IOException e) {
+            return 0L;
+        }
+    }
+
+    @Override
     public boolean isWritable() {
         return Files.isWritable(path);
     }

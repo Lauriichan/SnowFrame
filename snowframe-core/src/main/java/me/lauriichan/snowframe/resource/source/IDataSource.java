@@ -91,6 +91,15 @@ public interface IDataSource {
     }
 
     /**
+     * Gets the size of the source in bytes
+     * 
+     * @return the size of the source in bytes
+     */
+    default long size() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Checks if the data source can be written to
      * 
      * @return @{code true} if the source can be written to otherwise @{code false}
@@ -197,6 +206,19 @@ public interface IDataSource {
             try (OutputStream outputStream = targetSource.openWritableStream()) {
                 inputStream.transferTo(outputStream);
             }
+        }
+    }
+
+    /**
+     * Copies the data of this data source to the target stream
+     * 
+     * @param  targetStrean the target stream
+     * 
+     * @throws IOException  if an I/O error occurs
+     */
+    default void transferTo(OutputStream targetStream) throws IOException {
+        try (InputStream inputStream = openReadableStream()) {
+            inputStream.transferTo(targetStream);
         }
     }
 

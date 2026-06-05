@@ -72,6 +72,11 @@ public final class FileDataSource implements IDataSource {
     }
 
     @Override
+    public long size() {
+        return file.length();
+    }
+
+    @Override
     public boolean isWritable() {
         return file.isFile();
     }
