@@ -11,17 +11,21 @@ import me.lauriichan.snowframe.util.http.type.HttpContentType;
 
 public final class MultiFormData {
 
-    public static record FormData<T>(String key, String providedType, HttpContentType<T> type, T value) {}
+    public static record FormData<T>(String key, String fileName, String providedType, HttpContentType<T> type, T value) {}
 
     private final Object2ObjectOpenHashMap<String, FormData<?>> fields = new Object2ObjectOpenHashMap<>();
 
     public <T> void put(String key, HttpContentType<T> type, T value) {
-        fields.put(key, new FormData<>(key, type.name(), type, value));
+        fields.put(key, new FormData<>(key, null, type.name(), type, value));
     }
 
-    public <T> void readAndPut(String key, String providedType, HttpContentType<T> type, HttpHeaders headers, FastByteArrayInputStream input)
+    public <T> void put(String key, String fileName, HttpContentType<T> type, T value) {
+        fields.put(key, new FormData<>(key, fileName, type.name(), type, value));
+    }
+
+    public <T> void readAndPut(String key, String fileName, String providedType, HttpContentType<T> type, HttpHeaders headers, FastByteArrayInputStream input)
         throws IOException {
-        fields.put(key, new FormData<>(key, providedType, type, type.read(headers, input)));
+        fields.put(key, new FormData<>(key, fileName, providedType, type, type.read(headers, input)));
     }
 
     public ObjectSet<String> keys() {

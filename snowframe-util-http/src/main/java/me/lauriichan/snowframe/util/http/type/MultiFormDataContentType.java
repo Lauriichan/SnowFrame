@@ -1,6 +1,7 @@
 package me.lauriichan.snowframe.util.http.type;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 
 import com.sun.net.httpserver.Headers;
 
@@ -12,11 +13,15 @@ import it.unimi.dsi.fastutil.objects.ObjectLists;
 import me.lauriichan.snowframe.util.http.HttpHeaders;
 import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
 import me.lauriichan.snowframe.util.http.data.MultiFormData;
+import me.lauriichan.snowframe.util.http.data.MultiFormData.FormData;
 import me.lauriichan.snowframe.util.http.plexus.SelectorUtils;
 
 final class MultiFormDataContentType extends HttpContentType<MultiFormData> {
 
     private static final byte CR /* Carriage Return */ = 13, LF /* Line feed */ = 10;
+    private static final SecureRandom BOUNDARY_RANDOM = new SecureRandom();
+
+    private static final char[] BOUNDARY_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".toCharArray();
 
     private final ObjectList<HttpContentType<?>> supported;
 
@@ -66,6 +71,7 @@ final class MultiFormDataContentType extends HttpContentType<MultiFormData> {
                 throw new IOException("Invalid multi form data");
             }
             String fieldName = disposition.get("name");
+            String fileName = disposition.getOrDefault("filename", null);
             String providedFieldType = rawContentTypeOf(dataHeaders);
             HttpContentType<?> fieldType = supportedTypeFor(providedFieldType);
             if (fieldType == null) {
@@ -96,11 +102,12 @@ final class MultiFormDataContentType extends HttpContentType<MultiFormData> {
             if (dataLength <= 0) {
                 throw new IOException("Invalid form field data for field '%s'".formatted(fieldName));
             }
-            data.readAndPut(fieldName, providedFieldType, fieldType, dataHeaders, new FastByteArrayInputStream(input.array, dataStart, dataLength));
+            data.readAndPut(fieldName, fileName, providedFieldType, fieldType, dataHeaders,
+                new FastByteArrayInputStream(input.array, dataStart, dataLength));
         }
         return data;
     }
-    
+
     private String rawContentTypeOf(HttpHeaders headers) {
         IHeaderArgs type = headers.getArguments("Content-Type");
         if (type != null && type.hasUnnamed()) {
@@ -205,7 +212,50 @@ final class MultiFormDataContentType extends HttpContentType<MultiFormData> {
 
     @Override
     public void write(IHeaderArgs typeArgs, FastByteArrayOutputStream outputStream, MultiFormData value) throws IOException {
-        // TODO: Write this
+        StringBuilder builder = new StringBuilder("--");
+        for (int length = 24; length > 0; length--) {
+            builder.append(BOUNDARY_CHARS[BOUNDARY_RANDOM.nextInt(BOUNDARY_CHARS.length)]);
+        }
+        String boundary = builder.toString();
+        typeArgs.set("boundary", boundary);
+        FastByteArrayOutputStream dataStream = new FastByteArrayOutputStream();
+        for (FormData<?> data : value.fields()) {
+            dataStream.reset();
+            outputStream.writeChars("--");
+            outputStream.writeChars(boundary);
+            outputStream.writeChar(CR);
+            outputStream.writeChar(LF);
+            outputStream.writeChars("Content-Disposition: form-data; name=\"");
+            outputStream.writeChars(data.key());
+            outputStream.writeChar('"');
+            if (data.fileName() != null) {
+                outputStream.writeChars("; filename=\"");
+                outputStream.writeChars(data.fileName());
+                outputStream.writeChar('"');
+            }
+            outputStream.writeChar(CR);
+            outputStream.writeChar(LF);
+            outputStream.writeChars("Content-Type: ");
+            IHeaderArgs args = HttpHeaders.modifiableArgs();
+            writeData(data, args, dataStream);
+            outputStream.writeChars(args.asHeaderValue());
+            outputStream.writeChar(CR);
+            outputStream.writeChar(LF);
+            outputStream.writeChar(CR);
+            outputStream.writeChar(LF);
+            outputStream.write(dataStream.array, 0, dataStream.length);
+            outputStream.writeChar(CR);
+            outputStream.writeChar(LF);
+        }
+        outputStream.writeChars("--");
+        outputStream.writeChars(boundary);
+        outputStream.writeChars("--");
+        outputStream.writeChar(CR);
+        outputStream.writeChar(LF);
+    }
+
+    private <T> void writeData(FormData<T> data, IHeaderArgs args, FastByteArrayOutputStream output) throws IOException {
+        data.type().write(args, output, data.value());
     }
 
 }
