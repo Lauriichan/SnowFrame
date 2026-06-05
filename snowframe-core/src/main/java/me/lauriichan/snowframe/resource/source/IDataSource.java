@@ -229,7 +229,7 @@ public interface IDataSource {
      * @throws IOException        if an I/O error occurs
      */
     default void transferTo(IDataSource targetSource, boolean enforceSameContent) throws IOException {
-        if (exists()) {
+        if (!exists()) {
             throw new IOException("Source data source doesn't exist: " + getPath());
         }
         if (!isContainer()) {
