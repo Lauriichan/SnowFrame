@@ -1,6 +1,7 @@
 package me.lauriichan.snowframe.util.http.type;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
 import com.sun.net.httpserver.Headers;
@@ -55,7 +56,7 @@ final class MultiFormDataContentType extends HttpContentType<MultiFormData> {
                 throw new IOException("Invalid multi form data");
             }
             input.read(bytes);
-            String str = new String(bytes);
+            String str = new String(bytes, StandardCharsets.US_ASCII);
             if (str.startsWith("--") && str.substring(2).equals(boundary)) {
                 int b1 = input.read();
                 int b2 = input.read();
@@ -89,7 +90,7 @@ final class MultiFormDataContentType extends HttpContentType<MultiFormData> {
                 input.mark(0);
                 input.read(bytes);
                 try {
-                    str = new String(bytes);
+                    str = new String(bytes, StandardCharsets.US_ASCII);
                     if (str.startsWith("--") && str.substring(2).equals(boundary)) {
                         break;
                     }
@@ -220,38 +221,25 @@ final class MultiFormDataContentType extends HttpContentType<MultiFormData> {
         typeArgs.set("boundary", boundary);
         FastByteArrayOutputStream dataStream = new FastByteArrayOutputStream();
         for (FormData<?> data : value.fields()) {
+            builder = new StringBuilder();
             dataStream.reset();
-            outputStream.writeChars("--");
-            outputStream.writeChars(boundary);
-            outputStream.writeChar(CR);
-            outputStream.writeChar(LF);
-            outputStream.writeChars("Content-Disposition: form-data; name=\"");
-            outputStream.writeChars(data.key());
-            outputStream.writeChar('"');
+            builder.append("--").append(boundary).append("\r\n");
+            builder.append("Content-Disposition: form-data; name=").append('"').append(data.key()).append('"');
             if (data.fileName() != null) {
-                outputStream.writeChars("; filename=\"");
-                outputStream.writeChars(data.fileName());
-                outputStream.writeChar('"');
+                builder.append("; filename=").append('"').append(data.fileName()).append('"');
             }
-            outputStream.writeChar(CR);
-            outputStream.writeChar(LF);
-            outputStream.writeChars("Content-Type: ");
+            builder.append("\r\n");
             IHeaderArgs args = HttpHeaders.modifiableArgs();
+            args.addUnnamed(data.type().name());
             writeData(data, args, dataStream);
-            outputStream.writeChars(args.asHeaderValue());
-            outputStream.writeChar(CR);
-            outputStream.writeChar(LF);
-            outputStream.writeChar(CR);
-            outputStream.writeChar(LF);
+            builder.append("Content-Type: ").append(args.asHeaderValue()).append("\r\n").append("\r\n");
+            outputStream.write(builder.toString().getBytes(StandardCharsets.US_ASCII));
             outputStream.write(dataStream.array, 0, dataStream.length);
-            outputStream.writeChar(CR);
-            outputStream.writeChar(LF);
+            outputStream.write(CR);
+            outputStream.write(LF);
         }
-        outputStream.writeChars("--");
-        outputStream.writeChars(boundary);
-        outputStream.writeChars("--");
-        outputStream.writeChar(CR);
-        outputStream.writeChar(LF);
+        outputStream
+            .write(new StringBuilder("--").append(boundary).append("--").append("\r\n").toString().getBytes(StandardCharsets.US_ASCII));
     }
 
     private <T> void writeData(FormData<T> data, IHeaderArgs args, FastByteArrayOutputStream output) throws IOException {

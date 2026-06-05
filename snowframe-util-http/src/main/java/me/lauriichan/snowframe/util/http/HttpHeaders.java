@@ -125,6 +125,14 @@ public final class HttpHeaders {
             named.put(key, value);
         }
 
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder(getClass().getSimpleName()).append('{');
+            builder.append("named={").append(named.toString()).append("}").append("unnamed=[").append(unnamed.toString()).append(']')
+                .append('}');
+            return builder.toString();
+        }
+
     }
 
     private static final class HeaderArgs implements IHeaderArgs {
@@ -174,6 +182,14 @@ public final class HttpHeaders {
                 return fallback;
             }
             return unnamed[index];
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder(getClass().getSimpleName()).append('{');
+            builder.append("named={").append(named.toString()).append("}").append("unnamed=[").append(unnamed.toString()).append(']')
+                .append('}');
+            return builder.toString();
         }
 
     }
@@ -377,6 +393,13 @@ public final class HttpHeaders {
             builder.append('\\');
         }
         return new ReadData(builder.toString(), index, terminated);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(getClass().getSimpleName()).append('{');
+        builder.append(delegate.toString()).append('}');
+        return builder.toString();
     }
 
 }
