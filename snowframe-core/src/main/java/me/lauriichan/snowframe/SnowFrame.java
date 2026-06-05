@@ -2,8 +2,6 @@ package me.lauriichan.snowframe;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystemNotFoundException;
@@ -144,15 +142,15 @@ public final class SnowFrame<T extends ISnowFrameApp<T>> {
         }
         return path;
     }
-    
+
     /*
      * Parent
      */
-    
+
     public boolean hasParent() {
         return parent != null;
     }
-    
+
     public SnowFrame<?> parent() {
         return parent;
     }
@@ -176,40 +174,8 @@ public final class SnowFrame<T extends ISnowFrameApp<T>> {
         if (!internal.exists()) {
             return external;
         }
-        transferOutside(internal, external, forceSameContents);
+        internal.transferTo(external);
         return external;
-    }
-
-    private void transferOutside(IDataSource source, IDataSource target, boolean forceSameContents) throws IOException {
-        if (!source.isContainer()) {
-            try (OutputStream output = target.openWritableStream()) {
-                try (InputStream input = source.openReadableStream()) {
-                    input.transferTo(output);
-                }
-            }
-            return;
-        }
-        IDataSource[] contents = source.getContents();
-        for (IDataSource content : contents) {
-            transferOutside(content, target.resolve(content.name()), forceSameContents);
-        }
-        if (forceSameContents) {
-            IDataSource[] outside = target.getContents();
-            if (contents.length != outside.length) {
-                for (IDataSource tmp1 : outside) {
-                    boolean found = false;
-                    for (IDataSource tmp2 : contents) {
-                        if (tmp1.name().equals(tmp2.name())) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        tmp1.delete();
-                    }
-                }
-            }
-        }
     }
 
     /*
@@ -248,7 +214,7 @@ public final class SnowFrame<T extends ISnowFrameApp<T>> {
     public ISimpleLogger logger() {
         return logger;
     }
-    
+
     public Lifecycle<T> lifecycle() {
         return lifecycle;
     }

@@ -55,7 +55,7 @@ public final class FileDataSource implements IDataSource {
     public String name() {
         return file.getName();
     }
-    
+
     @Override
     public String getPath() {
         return file.getAbsolutePath();
@@ -79,6 +79,18 @@ public final class FileDataSource implements IDataSource {
     @Override
     public boolean isWritable() {
         return file.isFile();
+    }
+
+    @Override
+    public void createAsContainer() throws IOException {
+        if (file.isDirectory()) {
+            return;
+        }
+        if (file.exists()) {
+            throw new IOException(
+                "Can not create container if there is already a resource at location '%s'".formatted(file.getAbsolutePath()));
+        }
+        file.mkdirs();
     }
 
     @Override

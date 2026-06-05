@@ -109,7 +109,19 @@ public interface IDataSource {
     }
 
     /**
+     * Tries to create the data source as container
+     * 
+     * @throws IOException if an I/O error occurs (or if the source exists as
+     *                     resource already)
+     */
+    default void createAsContainer() throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Deletes the data source target
+     * 
+     * @throws IOException if an I/O error occurs
      */
     default void delete() throws IOException {
         throw new UnsupportedOperationException();
@@ -195,16 +207,61 @@ public interface IDataSource {
     }
 
     /**
-     * Copies the data of this data source to the target data source
+     * Copies the data of this data source to the target data source.
+     * 
+     * Doesn't enforce the content in the target source to 100% match the source.
      * 
      * @param  targetSource the target source
      * 
      * @throws IOException  if an I/O error occurs
      */
     default void transferTo(IDataSource targetSource) throws IOException {
-        try (InputStream inputStream = openReadableStream()) {
-            try (OutputStream outputStream = targetSource.openWritableStream()) {
-                inputStream.transferTo(outputStream);
+        transferTo(targetSource, false);
+    }
+
+    /**
+     * Copies the data of this data source to the target data source
+     * 
+     * @param  targetSource       the target source
+     * @param  enforceSameContent if the content between both source should be same,
+     *                            no more no less.
+     * 
+     * @throws IOException        if an I/O error occurs
+     */
+    default void transferTo(IDataSource targetSource, boolean enforceSameContent) throws IOException {
+        if (exists()) {
+            throw new IOException("Source data source doesn't exist: " + getPath());
+        }
+        if (!isContainer()) {
+            try (InputStream inputStream = openReadableStream()) {
+                try (OutputStream outputStream = targetSource.openWritableStream()) {
+                    inputStream.transferTo(outputStream);
+                }
+            }
+            return;
+        }
+        targetSource.createAsContainer();
+        IDataSource[] contents = getContents();
+        for (IDataSource child : contents) {
+            child.transferTo(targetSource.resolve(child.name()));
+        }
+        if (!enforceSameContent) {
+            return;
+        }
+        IDataSource[] targetContents = targetSource.getContents();
+        if (contents.length == targetContents.length) {
+            return;
+        }
+        for (IDataSource tmp1 : targetContents) {
+            boolean found = false;
+            for (IDataSource tmp2 : contents) {
+                if (tmp1.name().equals(tmp2.name())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                tmp1.delete();
             }
         }
     }

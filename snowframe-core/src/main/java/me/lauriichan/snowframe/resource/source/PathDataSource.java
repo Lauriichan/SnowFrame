@@ -98,6 +98,17 @@ public final class PathDataSource implements IDataSource {
     }
 
     @Override
+    public void createAsContainer() throws IOException {
+        if (Files.isDirectory(path)) {
+            return;
+        }
+        if (Files.exists(path)) {
+            throw new IOException("Can not create container if there is already a resource at location '%s'".formatted(path));
+        }
+        Files.createDirectories(path);
+    }
+
+    @Override
     public void delete() throws IOException {
         if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
             deleteDir(path);
