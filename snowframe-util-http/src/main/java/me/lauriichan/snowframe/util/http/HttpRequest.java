@@ -176,7 +176,7 @@ public final class HttpRequest {
         return call(responseType, null, null);
     }
 
-    public <T> HttpResponse<T> call(HttpContentType<T> responseType, HttpContentType<T> contentType, T content) throws IOException {
+    public <T, C> HttpResponse<T> call(HttpContentType<T> responseType, HttpContentType<C> contentType, C content) throws IOException {
         IHttpProgressListener downloadListener = this.downloadListener;
         IHttpProgressListener uploadListener = this.uploadListener;
         String url = this.url;

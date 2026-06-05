@@ -67,6 +67,10 @@ public abstract class HttpContentType<T> {
         return new RestrictingHttpContentType<>(this, acceptPatterns);
     }
 
+    public final HttpContentType<T> disguise(String name) {
+        return new DisguisedHttpContentType<>(this, name);
+    }
+
     public abstract T read(HttpHeaders headers, FastByteArrayInputStream inputStream) throws IOException;
 
     public abstract void write(IHeaderArgs typeArgs, FastByteArrayOutputStream outputStream, T value) throws IOException;
