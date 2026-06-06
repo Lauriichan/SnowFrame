@@ -16,8 +16,9 @@ import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
 import me.lauriichan.snowframe.util.http.type.HttpContentType;
 
 public final class HttpRequest {
-    
-    private static final IHttpProgressListener NOOP = (_1, _2) -> {};
+
+    private static final IHttpProgressListener NOOP = (_1, _2) -> {
+    };
 
     private final Object2ObjectArrayMap<String, String> headers = new Object2ObjectArrayMap<>();
     private final Object2ObjectArrayMap<String, String> parameters = new Object2ObjectArrayMap<>();
@@ -52,20 +53,20 @@ public final class HttpRequest {
         this.method = Objects.requireNonNull(method);
         return this;
     }
-    
+
     public IHttpProgressListener downloadListener() {
         return downloadListener;
     }
-    
+
     public HttpRequest downloadListener(IHttpProgressListener downloadListener) {
         this.downloadListener = downloadListener == null ? NOOP : downloadListener;
         return this;
     }
-    
+
     public IHttpProgressListener uploadListener() {
         return uploadListener;
     }
-    
+
     public HttpRequest uploadListener(IHttpProgressListener uploadListener) {
         this.uploadListener = uploadListener == null ? NOOP : uploadListener;
         return this;
@@ -187,7 +188,6 @@ public final class HttpRequest {
             throw new IllegalArgumentException("Invalid response type");
         }
 
-
         if (!parameters.isEmpty()) {
             UrlEncoder encoder = UrlEncoder.UTF_8;
             StringBuilder builder = new StringBuilder();
@@ -253,6 +253,7 @@ public final class HttpRequest {
             stream.close();
         }
 
+        HttpHeaders headers = new HttpHeaders(new NormalizedMap(connection.getHeaderFields()));
         InputStream stream;
         try {
             stream = connection.getInputStream();
@@ -288,7 +289,6 @@ public final class HttpRequest {
             length = 0;
         }
 
-        HttpHeaders headers = new HttpHeaders(connection.getHeaderFields());
         HttpData<T> responseData;
         try (FastByteArrayInputStream input = new FastByteArrayInputStream(data, 0, length)) {
             responseData = new HttpData<>(responseType.read(headers, input), null);

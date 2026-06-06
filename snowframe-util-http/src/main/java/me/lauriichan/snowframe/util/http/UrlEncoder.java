@@ -14,7 +14,7 @@ public final class UrlEncoder {
      * java.net.URLDecoder
      */
 
-    static BitSet dontNeedEncoding;
+    static BitSet dontNeedEncoding, dontNeedEncodingHeader;
     static final int caseDiff = ('a' - 'A');
 
     static {
@@ -37,6 +37,9 @@ public final class UrlEncoder {
         dontNeedEncoding.set('_');
         dontNeedEncoding.set('.');
         dontNeedEncoding.set('*');
+        
+        dontNeedEncodingHeader = (BitSet) dontNeedEncoding.clone();
+        dontNeedEncodingHeader.set('/');
     }
 
     public static boolean needsEncoding(char ch) {
@@ -45,6 +48,14 @@ public final class UrlEncoder {
 
     public static boolean needsEncoding(CharSequence seq) {
         return !seq.chars().allMatch(dontNeedEncoding::get);
+    }
+
+    public static boolean needsEncodingHeader(char ch) {
+        return !dontNeedEncodingHeader.get(ch);
+    }
+
+    public static boolean needsEncodingHeader(CharSequence seq) {
+        return !seq.chars().allMatch(dontNeedEncodingHeader::get);
     }
 
     private final Charset charset;

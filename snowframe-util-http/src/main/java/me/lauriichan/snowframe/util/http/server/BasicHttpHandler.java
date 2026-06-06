@@ -75,7 +75,7 @@ final class BasicHttpHandler<T> implements HttpHandler {
                 exchange.sendResponseHeaders(HttpCode.INTERNAL_SERVER_ERROR.code(), -1);
                 return;
             }
-            if (data.length == 0) {
+            if (length == 0) {
                 exchange.sendResponseHeaders(response.code().code(), -1);
                 return;
             }

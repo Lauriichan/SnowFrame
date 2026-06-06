@@ -252,7 +252,7 @@ public final class HttpHeaders {
             if (str.isEmpty()) {
                 return builder.append("\"\"");
             }
-            if (!UrlEncoder.needsEncoding(str)) {
+            if (!UrlEncoder.needsEncodingHeader(str)) {
                 return builder.append(str);
             }
             builder.append('"');
