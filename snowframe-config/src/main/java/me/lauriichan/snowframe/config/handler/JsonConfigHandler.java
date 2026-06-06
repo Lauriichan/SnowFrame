@@ -20,16 +20,17 @@ import me.lauriichan.snowframe.io.serialization.json.JsonSerializationHandler;
 import me.lauriichan.snowframe.resource.source.IDataSource;
 
 public final class JsonConfigHandler implements IConfigHandler {
-    
+
     public static final JsonWriter WRITER = new JsonWriter().setPretty(true).setSpaces(true).setIndent(4);
 
     public static final JsonConfigHandler JSON = new JsonConfigHandler();
-    
-    public static final String KEY_SERIALIZE_TYPE = "type";
-    public static final String KEY_SERIALIZE_DATA = "data";
+
+    public static final String KEY_SERIALIZE_TYPE = "__type";
+    public static final String KEY_SERIALIZE_DATA = "__data";
 
     @Override
-    public void load(final IOManager ioManager, final Configuration configuration, final IDataSource source, boolean onlyRaw) throws Exception {
+    public void load(final IOManager ioManager, final Configuration configuration, final IDataSource source, boolean onlyRaw)
+        throws Exception {
         IJson<?> element;
         try (BufferedReader reader = source.openReader()) {
             element = JsonParser.fromReader(reader);
@@ -40,7 +41,8 @@ public final class JsonConfigHandler implements IConfigHandler {
         loadToConfig(ioManager, element.asJsonObject(), configuration, onlyRaw);
     }
 
-    private void loadToConfig(final IOManager ioManager, final JsonObject object, final Configuration configuration, boolean onlyRaw) throws SerializationException {
+    private void loadToConfig(final IOManager ioManager, final JsonObject object, final Configuration configuration, boolean onlyRaw)
+        throws SerializationException {
         for (final String key : object.keySet()) {
             final IJson<?> element = object.get(key);
             if (element.isNull()) {
@@ -59,7 +61,8 @@ public final class JsonConfigHandler implements IConfigHandler {
     }
 
     @SuppressWarnings("unchecked")
-    private void deserialize(final IOManager ioManager, Configuration configuration, String key, JsonObject object, boolean onlyRaw) throws SerializationException {
+    private void deserialize(final IOManager ioManager, Configuration configuration, String key, JsonObject object, boolean onlyRaw)
+        throws SerializationException {
         String type = object.getAsString(KEY_SERIALIZE_TYPE);
         if (onlyRaw || type == null) {
             loadToConfig(ioManager, object, configuration.getConfiguration(key, true), onlyRaw);
@@ -111,7 +114,8 @@ public final class JsonConfigHandler implements IConfigHandler {
         }
     }
 
-    private void saveToObject(final IOManager ioManager, final JsonObject object, final Configuration configuration) throws SerializationException {
+    private void saveToObject(final IOManager ioManager, final JsonObject object, final Configuration configuration)
+        throws SerializationException {
         IJson<?> json;
         for (final String key : configuration.keySet()) {
             if (configuration.isConfiguration(key)) {
