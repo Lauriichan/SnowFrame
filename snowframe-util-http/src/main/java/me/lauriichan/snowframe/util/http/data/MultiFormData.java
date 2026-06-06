@@ -5,6 +5,7 @@ import java.io.IOException;
 import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectCollection;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import me.lauriichan.snowframe.util.http.HttpHeaders;
 import me.lauriichan.snowframe.util.http.type.HttpContentType;
@@ -23,8 +24,8 @@ public final class MultiFormData {
         fields.put(key, new FormData<>(key, fileName, type.name(), type, value));
     }
 
-    public <T> void readAndPut(String key, String fileName, String providedType, HttpContentType<T> type, HttpHeaders headers, FastByteArrayInputStream input)
-        throws IOException {
+    public <T> void readAndPut(String key, String fileName, String providedType, HttpContentType<T> type, HttpHeaders headers,
+        FastByteArrayInputStream input) throws IOException {
         fields.put(key, new FormData<>(key, fileName, providedType, type, type.read(headers, input)));
     }
 
@@ -76,6 +77,34 @@ public final class MultiFormData {
             return fallback;
         }
         return type.cast(data.value());
+    }
+
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("MultiFormData[");
+        builder.append("\n");
+        ObjectIterator<FormData<?>> iterator = fields().iterator();
+        while (iterator.hasNext()) {
+            FormData<?> data = iterator.next();
+            builder.append("\tData[");
+            builder.append("\n\t");
+            builder.append("name=").append(data.key());
+            builder.append("\n\t");
+            builder.append("filename=");
+            if (data.fileName() == null || data.fileName().isBlank()) {
+                builder.append("null");
+            } else {
+                builder.append(data.fileName());
+            }
+            builder.append("\n\t");
+            builder.append("data='");
+            builder.append(data.value());
+            builder.append("'\n\t]");
+            if (iterator.hasNext()) {
+                builder.append(",\n");
+            }
+        }
+        return builder.append("\n]").toString();
     }
 
 }
