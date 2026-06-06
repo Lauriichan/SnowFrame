@@ -18,8 +18,13 @@ public abstract class HttpContentType<T> {
     public static final HttpContentType<String> TEXT = PlainTextContentType.PLAIN_TEXT;
     public static final HttpContentType<Object2ObjectArrayMap<String, String>> URL_ENCODED = UrlEncodedContentType.URL_ENCODED;
 
+    public static final HttpContentType<MultiFormData> DEFAULT_MULTIFORM_DATA = multiFormData();
+
     public static final HttpContentType<MultiFormData> multiFormData(HttpContentType<?>... accepts) {
         if (accepts == null || accepts.length == 0) {
+            if (DEFAULT_MULTIFORM_DATA != null) {
+                return DEFAULT_MULTIFORM_DATA;
+            }
             accepts = new HttpContentType[] {
                 URL_ENCODED,
                 JSON,
