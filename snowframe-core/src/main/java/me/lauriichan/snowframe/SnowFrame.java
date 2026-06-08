@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -135,7 +136,14 @@ public final class SnowFrame<T extends ISnowFrameApp<T>> {
         }
         if (path == null) {
             try {
-                path = FileSystems.newFileSystem(uri, Collections.emptyMap()).getPath("/");
+                FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+                path = fileSystem.getPath("/");
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    try {
+                        fileSystem.close();
+                    } catch (IOException ignore) {
+                    }
+                }));
             } catch (final IOException e) {
                 throw new IllegalStateException("Unable to resolve jar root!", e);
             }
