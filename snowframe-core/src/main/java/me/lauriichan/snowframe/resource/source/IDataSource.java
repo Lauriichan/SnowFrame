@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
 
 public interface IDataSource {
@@ -60,6 +62,16 @@ public interface IDataSource {
      * @return the relative path
      */
     String getPath();
+
+    /**
+     * Get this source as URL
+     * 
+     * @return                               this source as URL
+     * 
+     * @throws MalformedURLException         if the created url is malformed
+     * @throws UnsupportedOperationException if the source doesn't support this.
+     */
+    URL getAsUrl() throws MalformedURLException;
 
     /**
      * Gets the name of the source target

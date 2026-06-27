@@ -3,6 +3,8 @@ package me.lauriichan.snowframe.resource.source;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -67,6 +69,11 @@ public final class PathDataSource implements IDataSource {
     @Override
     public String getPath() {
         return path.toAbsolutePath().toString();
+    }
+    
+    @Override
+    public URL getAsUrl() throws MalformedURLException {
+        return path.toUri().toURL();
     }
 
     @Override
