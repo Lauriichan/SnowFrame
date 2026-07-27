@@ -9,6 +9,8 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import it.unimi.dsi.fastutil.objects.ObjectSets;
 
 import java.util.Map.Entry;
@@ -145,18 +147,22 @@ public final class HttpHeaders {
             this.unnamed = unnamed;
         }
 
+        @Override
         public Set<String> keys() {
             return named.keySet();
         }
 
+        @Override
         public boolean has(String key) {
             return named.containsKey(key);
         }
 
+        @Override
         public String get(String key) {
             return getOrDefault(key, null);
         }
 
+        @Override
         public String getOrDefault(String key, String fallback) {
             String value = named.get(key);
             if (value == null) {
@@ -165,18 +171,22 @@ public final class HttpHeaders {
             return value;
         }
 
+        @Override
         public boolean hasUnnamed() {
             return unnamed.length != 0;
         }
 
+        @Override
         public int unnamedCount() {
             return unnamed.length;
         }
 
+        @Override
         public String getUnnamed(int index) {
             return getUnnamedOrDefault(index, null);
         }
 
+        @Override
         public String getUnnamedOrDefault(int index, String fallback) {
             if (index < 0 || index >= unnamed.length) {
                 return fallback;
@@ -204,6 +214,10 @@ public final class HttpHeaders {
 
         String getOrDefault(String key, String fallback);
 
+        default ObjectList<String> getAsList(String key) {
+            return asList(get(key));
+        }
+
         boolean hasUnnamed();
 
         int unnamedCount();
@@ -211,6 +225,10 @@ public final class HttpHeaders {
         String getUnnamed(int index);
 
         String getUnnamedOrDefault(int index, String fallback);
+
+        default ObjectList<String> getUnnamedAsList(int index) {
+            return asList(getUnnamed(index));
+        }
 
         default boolean isModifiable() {
             return false;
@@ -313,6 +331,14 @@ public final class HttpHeaders {
         return list.get(index);
     }
 
+    public ObjectList<String> getValueAsList(String key) {
+        return asList(getValue(key));
+    }
+
+    public ObjectList<String> getValueAsList(String key, int index) {
+        return asList(getValue(key, index));
+    }
+
     public IHeaderArgs getArguments(String key) {
         return getArguments(key, 0);
     }
@@ -345,7 +371,36 @@ public final class HttpHeaders {
         return new HeaderArgs(Object2ObjectMaps.unmodifiable(named), unnamed.toArray(String[]::new));
     }
 
-    private ReadData readUntilUnescaped(String string, int index, char... terminators) {
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(getClass().getSimpleName()).append('{');
+        builder.append(delegate.toString()).append('}');
+        return builder.toString();
+    }
+
+    /*
+     * Helper
+     */
+
+    private static ObjectList<String> asList(String value) {
+        if (value == null || value.isBlank()) {
+            return ObjectLists.emptyList();
+        }
+        int current = 0;
+        ReadData data;
+        ObjectArrayList<String> values = new ObjectArrayList<>();
+        while (current < value.length()) {
+            data = readUntilUnescaped(value, current, ',', ';');
+            current = data.newIndex + 1;
+            if (data.terminatorIndex == 1) {
+                break;
+            }
+            values.add(data.value.trim());
+        }
+        return ObjectLists.unmodifiable(values);
+    }
+
+    private static ReadData readUntilUnescaped(String string, int index, char... terminators) {
         StringBuilder builder = new StringBuilder();
         char ch;
         Character escape = null;
@@ -393,13 +448,6 @@ public final class HttpHeaders {
             builder.append('\\');
         }
         return new ReadData(builder.toString(), index, terminated);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder(getClass().getSimpleName()).append('{');
-        builder.append(delegate.toString()).append('}');
-        return builder.toString();
     }
 
 }
