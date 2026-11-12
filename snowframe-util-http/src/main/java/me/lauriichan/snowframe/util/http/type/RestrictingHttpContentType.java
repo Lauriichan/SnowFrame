@@ -1,6 +1,7 @@
 package me.lauriichan.snowframe.util.http.type;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
@@ -14,6 +15,11 @@ final class RestrictingHttpContentType<T> extends HttpContentType<T> {
     RestrictingHttpContentType(HttpContentType<T> delegate, String[] acceptPattern) {
         super(delegate.name(), delegate.valueType(), acceptPattern);
         this.delegate = delegate;
+    }
+    
+    @Override
+    public Charset charset() {
+        return delegate.charset();
     }
 
     @Override

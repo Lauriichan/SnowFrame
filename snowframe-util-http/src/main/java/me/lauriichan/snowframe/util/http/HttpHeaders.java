@@ -113,18 +113,30 @@ public final class HttpHeaders {
         public boolean allowsOverwrite() {
             return allowsOverwrite;
         }
-
+        
         @Override
-        public void addUnnamed(String string) {
-            unnamed.add(string);
+        public ModifiableHeaderArgs reset() {
+            if (!allowsOverwrite) {
+                throw new IllegalStateException("Resetting not allowed");
+            }
+            named.clear();
+            unnamed.clear();
+            return this;
         }
 
         @Override
-        public void set(String key, String value) {
+        public ModifiableHeaderArgs addUnnamed(String string) {
+            unnamed.add(string);
+            return this;
+        }
+
+        @Override
+        public ModifiableHeaderArgs set(String key, String value) {
             if (has(key) && !allowsOverwrite) {
                 throw new IllegalStateException("Key '%s' is already set".formatted(key));
             }
             named.put(key, value);
+            return this;
         }
 
         @Override
@@ -237,12 +249,16 @@ public final class HttpHeaders {
         default boolean allowsOverwrite() {
             return false;
         }
-
-        default void addUnnamed(String string) {
+        
+        default IHeaderArgs reset() {
             throw new UnsupportedOperationException();
         }
 
-        default void set(String key, String value) {
+        default IHeaderArgs addUnnamed(String string) {
+            throw new UnsupportedOperationException();
+        }
+
+        default IHeaderArgs set(String key, String value) {
             throw new UnsupportedOperationException();
         }
 

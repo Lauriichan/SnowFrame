@@ -34,12 +34,16 @@ public final class Version implements Comparable<Version> {
                 if (component >= 4) {
                     throw new IllegalArgumentException("Too many components");
                 }
+                if (minusPreviously) {
+                    // We have to reset
+                    minusPreviously = false;
+                }
                 components[component] = Integer.parseInt(builder.toString());
                 builder = new StringBuilder();
                 if (ch == '.') {
                     component++;
                 } else if (ch == '-') {
-                    if (component < 3) {
+                    if (component < 3 && i + 1 < string.length() && string.charAt(i + 1) == 'R') {
                         component = 3;
                     } else {
                         component++;

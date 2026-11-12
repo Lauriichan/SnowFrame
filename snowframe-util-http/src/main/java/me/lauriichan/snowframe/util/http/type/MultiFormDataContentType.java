@@ -210,7 +210,7 @@ final class MultiFormDataContentType extends HttpContentType<MultiFormData> {
         }
         return new HttpHeaders(hdrs);
     }
-
+    
     @Override
     public void write(IHeaderArgs typeArgs, FastByteArrayOutputStream outputStream, MultiFormData value) throws IOException {
         StringBuilder builder = new StringBuilder("--");

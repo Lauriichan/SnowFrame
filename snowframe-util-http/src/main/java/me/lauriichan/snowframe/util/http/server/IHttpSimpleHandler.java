@@ -6,14 +6,15 @@ import com.sun.net.httpserver.HttpExchange;
 
 import me.lauriichan.snowframe.util.http.HttpData;
 import me.lauriichan.snowframe.util.http.HttpHeaders;
+import me.lauriichan.snowframe.util.http.data.HttpEncoded;
 
 @FunctionalInterface
 public interface IHttpSimpleHandler<T> extends IHttpHandler<T> {
 
-    Response handle(InetAddress address, HttpHeaders headers, HttpQuery parameters);
+    Response handle(InetAddress address, HttpHeaders headers, HttpEncoded parameters);
 
     @Override
-    default Response handle(HttpExchange exchange, InetAddress address, HttpHeaders headers, HttpQuery parameters, HttpData<T> body) {
+    default Response handle(HttpExchange exchange, InetAddress address, HttpHeaders headers, HttpEncoded parameters, HttpData<T> body) {
         return handle(address, headers, parameters);
     }
 

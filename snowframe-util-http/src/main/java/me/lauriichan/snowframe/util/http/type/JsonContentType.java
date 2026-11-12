@@ -1,6 +1,8 @@
 package me.lauriichan.snowframe.util.http.type;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
@@ -22,6 +24,11 @@ final class JsonContentType extends HttpContentType<IJson<?>> {
         if (JSON != null) {
             throw new UnsupportedOperationException("Singleton");
         }
+    }
+    
+    @Override
+    public Charset charset() {
+        return StandardCharsets.UTF_8;
     }
 
     @Override

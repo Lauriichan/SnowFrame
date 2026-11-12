@@ -24,6 +24,10 @@ public final class MultiFormData {
         fields.put(key, new FormData<>(key, fileName, type.name(), type, value));
     }
 
+    public <T> void put(String key, String fileName, String providedType, HttpContentType<T> type, T value) {
+        fields.put(key, new FormData<>(key, fileName, providedType, type, value));
+    }
+
     public <T> void readAndPut(String key, String fileName, String providedType, HttpContentType<T> type, HttpHeaders headers,
         FastByteArrayInputStream input) throws IOException {
         fields.put(key, new FormData<>(key, fileName, providedType, type, type.read(headers, input)));

@@ -14,6 +14,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.snowframe.util.http.HttpCode;
 import me.lauriichan.snowframe.util.http.HttpMethod;
+import me.lauriichan.snowframe.util.http.data.HttpEncoded;
 import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
 import me.lauriichan.snowframe.util.http.HttpData;
 import me.lauriichan.snowframe.util.http.HttpHeaders;
@@ -139,7 +140,7 @@ final class BasicHttpHandler<T> implements HttpHandler {
         }
 
         try {
-            return handler.handle(exchange, exchange.getRemoteAddress().getAddress(), headers, new HttpQuery(exchange), body);
+            return handler.handle(exchange, exchange.getRemoteAddress().getAddress(), headers, HttpEncoded.parse(exchange.getRequestURI().getQuery()), body);
         } catch (Exception exception) {
             if (logger != null) {
                 logger.error("Failed to handle request", exception);

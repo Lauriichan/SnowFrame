@@ -1,14 +1,16 @@
 package me.lauriichan.snowframe.util.http.type;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import me.lauriichan.laylib.json.IJson;
 import me.lauriichan.snowframe.util.http.HttpHeaders;
 import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
+import me.lauriichan.snowframe.util.http.data.HttpEncoded;
 import me.lauriichan.snowframe.util.http.data.MultiFormData;
 
 public abstract class HttpContentType<T> {
@@ -16,7 +18,7 @@ public abstract class HttpContentType<T> {
     public static final HttpContentType<byte[]> BINARY = BinaryContentType.BINARY;
     public static final HttpContentType<IJson<?>> JSON = JsonContentType.JSON;
     public static final HttpContentType<String> TEXT = PlainTextContentType.PLAIN_TEXT;
-    public static final HttpContentType<Object2ObjectArrayMap<String, String>> URL_ENCODED = UrlEncodedContentType.URL_ENCODED;
+    public static final HttpContentType<HttpEncoded> URL_ENCODED = UrlEncodedContentType.URL_ENCODED;
 
     public static final HttpContentType<MultiFormData> DEFAULT_MULTIFORM_DATA = multiFormData();
 
@@ -68,12 +70,16 @@ public abstract class HttpContentType<T> {
         return valueType;
     }
 
-    public final HttpContentType<T> restrict(String... acceptPatterns) {
+    public HttpContentType<T> restrict(String... acceptPatterns) {
         return new RestrictingHttpContentType<>(this, acceptPatterns);
     }
 
-    public final HttpContentType<T> disguise(String name) {
+    public HttpContentType<T> disguise(String name) {
         return new DisguisedHttpContentType<>(this, name);
+    }
+    
+    public Charset charset() {
+        return StandardCharsets.US_ASCII;
     }
 
     public abstract T read(HttpHeaders headers, FastByteArrayInputStream inputStream) throws IOException;

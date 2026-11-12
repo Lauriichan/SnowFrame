@@ -119,5 +119,6 @@
     	<module>snowframe-pulsar</module>
     	<module>snowframe-imgui</module>
     	<module>snowframe-plugin</module>
+    	<module>snowframe-util-http-netty</module>
     </modules>
 </project>

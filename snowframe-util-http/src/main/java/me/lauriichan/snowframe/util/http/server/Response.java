@@ -11,13 +11,16 @@ import com.sun.net.httpserver.Headers;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectFunction;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap.Entry;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.lauriichan.snowframe.util.http.HttpCode;
+import me.lauriichan.snowframe.util.http.HttpHeaders;
 import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
 import me.lauriichan.snowframe.util.http.type.HttpContentType;
 
 public final class Response {
-    
+
     public static Response of(HttpCode code) {
         return new Response(code);
     }
@@ -27,17 +30,17 @@ public final class Response {
             this.type = Objects.requireNonNull(type);
             this.value = Objects.requireNonNull(value);
         }
-        
+
         public void write(IHeaderArgs args, FastByteArrayOutputStream outputStream) throws IOException {
             type.write(args, outputStream, value);
         }
     }
-    
+
     private static final Object2ObjectFunction<String, ObjectArrayList<String>> CREATOR = (_i) -> new ObjectArrayList<>();
 
     private final HttpCode code;
     private final Object2ObjectArrayMap<String, ObjectArrayList<String>> headers = new Object2ObjectArrayMap<>();
-    
+
     private Content<?> content;
 
     private Response(HttpCode code) {
@@ -47,12 +50,12 @@ public final class Response {
     public final HttpCode code() {
         return code;
     }
-    
+
     public final <T> Response content(HttpContentType<T> type, T value) {
         this.content = new Content<>(type, value);
         return this;
     }
-    
+
     public final Content<?> content() {
         return content;
     }
@@ -122,13 +125,21 @@ public final class Response {
 
     public final void loadFrom(Headers headers) {
         headers.clear();
-        for (Map.Entry<String, List<String>> entries : headers.entrySet()) {
-            headers.put(entries.getKey(), new ObjectArrayList<>(entries.getValue()));
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+            headers.put(entry.getKey(), new ObjectArrayList<>(entry.getValue()));
         }
     }
 
     public final void saveTo(Headers headers) {
         headers.putAll(this.headers);
+    }
+
+    public final HttpHeaders asHeaders() {
+        Object2ObjectOpenHashMap<String, List<String>> map = new Object2ObjectOpenHashMap<>();
+        for (Entry<String, ObjectArrayList<String>> entry : headers.object2ObjectEntrySet()) {
+            map.put(entry.getKey(), new ObjectArrayList<>(entry.getValue()));
+        }
+        return new HttpHeaders(map);
     }
 
 }

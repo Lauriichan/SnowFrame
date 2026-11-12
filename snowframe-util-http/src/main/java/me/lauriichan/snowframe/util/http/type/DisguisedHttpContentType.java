@@ -1,6 +1,7 @@
 package me.lauriichan.snowframe.util.http.type;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
@@ -14,6 +15,11 @@ final class DisguisedHttpContentType<T> extends HttpContentType<T> {
     DisguisedHttpContentType(HttpContentType<T> delegate, String name) {
         super(name, delegate.valueType(), delegate.acceptPattern());
         this.delegate = delegate;
+    }
+    
+    @Override
+    public Charset charset() {
+        return delegate.charset();
     }
 
     @Override
