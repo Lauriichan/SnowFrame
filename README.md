@@ -6,7 +6,7 @@ Snowframe is a library collection which allows to modularly build a application 
 
 ```xml
 <properties>
-  <snowframe.version>1.0.0</snowframe.version>
+  <snowframe.version>0.3.0</snowframe.version>
 </properties>
 
 <repositories>
