@@ -1,6 +1,7 @@
 package me.lauriichan.snowframe.util.http.netty;
 
 import java.io.IOException;
+import java.util.EnumMap;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
@@ -13,17 +14,24 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.lauriichan.snowframe.util.http.HttpData;
 import me.lauriichan.snowframe.util.http.HttpHeaders;
+import me.lauriichan.snowframe.util.http.HttpMethod;
 import me.lauriichan.snowframe.util.http.data.HttpEncoded;
 import me.lauriichan.snowframe.util.http.server.Response;
 import me.lauriichan.snowframe.util.http.type.HttpContentType;
 
 public final class HttpNode {
 
-    public static record Handler<T>(HttpContentType<T> contentType, INettyHttpHandler<T> handler) {
+    public static record Handler<T>(HttpContentType<T> contentType, IAuthenticator authenticator, INettyHttpHandler<T> handler) {
 
         @SuppressWarnings("unchecked")
         public final Response handle(Channel channel, HttpHeaders headers, HttpEncoded query, HttpPath path, ByteBuf bodyBuffer) {
-            if (handler instanceof IBodylessNettyHttpHandler<T> bodylessHandler) {
+            if (authenticator != null) {
+                Response response = authenticator.authenticate(channel, headers);
+                if (response != null) {
+                    return response;
+                }
+            }
+            if (handler instanceof IBodylessNettyHttpHandler bodylessHandler) {
                 return bodylessHandler.handle(channel, headers, query, path);
             }
             HttpData<T> body;
@@ -54,7 +62,7 @@ public final class HttpNode {
     private final String id;
     private final AtomicReference<IVariableType> type = new AtomicReference<>();
 
-    private final AtomicReference<Handler<?>> handler = new AtomicReference<>();
+    private final EnumMap<HttpMethod, Handler<?>> handlers = new EnumMap<>(HttpMethod.class);
 
     private final Object2ObjectOpenHashMap<String, HttpNode> paths = new Object2ObjectOpenHashMap<>();
 
@@ -100,7 +108,7 @@ public final class HttpNode {
             return;
         }
         paths.clear();
-        handler.set(null);
+        handlers.clear();
     }
 
     public void delete() {
@@ -193,20 +201,61 @@ public final class HttpNode {
     public boolean isVariableComplete() {
         return id == null || this.type.get() == null;
     }
-
-    public <T> boolean handler(HttpContentType<T> contentType, INettyHttpHandler<T> handler) {
-        if (contentType == null || handler == null) {
-            throw new IllegalArgumentException("Content type or handler can not be null");
+    
+    public boolean handler(HttpMethod method, IBodylessNettyHttpHandler handler) {
+        if (method == null || handler == null) {
+            throw new IllegalArgumentException("Method or handler can not be null");
         }
-        return this.handler.compareAndSet(null, new Handler<>(contentType, handler));
+        if (this.handlers.containsKey(method)) {
+            return false;
+        }
+        this.handlers.put(method, new Handler<>(null, null, handler));
+        return true;
+    }
+    
+    public boolean handler(HttpMethod method, IAuthenticator authenticator, IBodylessNettyHttpHandler handler) {
+        if (method == null || handler == null) {
+            throw new IllegalArgumentException("Method or handler can not be null");
+        }
+        if (this.handlers.containsKey(method)) {
+            return false;
+        }
+        this.handlers.put(method, new Handler<>(null, authenticator, handler));
+        return true;
     }
 
-    public Handler<?> handler() {
-        return this.handler.get();
+    public <T> boolean handler(HttpMethod method, HttpContentType<T> contentType, INettyHttpHandler<T> handler) {
+        if (method == null ||contentType == null || handler == null) {
+            throw new IllegalArgumentException("Method, Content type or handler can not be null");
+        }
+        if (this.handlers.containsKey(method)) {
+            return false;
+        }
+        this.handlers.put(method, new Handler<>(contentType, null, handler));
+        return true;
     }
 
-    public boolean isHandled() {
-        return this.handler.get() != null;
+    public <T> boolean handler(HttpMethod method, IAuthenticator authenticator, HttpContentType<T> contentType, INettyHttpHandler<T> handler) {
+        if (method == null ||contentType == null || handler == null) {
+            throw new IllegalArgumentException("Method, Content type or handler can not be null");
+        }
+        if (this.handlers.containsKey(method)) {
+            return false;
+        }
+        this.handlers.put(method, new Handler<>(contentType, authenticator, handler));
+        return true;
+    }
+    
+    public Handler<?> handler(HttpMethod method) {
+        return handlers.get(method);
+    }
+    
+    public boolean isAnyHandled() {
+        return !handlers.isEmpty();
+    }
+    
+    public boolean isHandled(HttpMethod method) {
+        return handlers.containsKey(method);
     }
 
     /*

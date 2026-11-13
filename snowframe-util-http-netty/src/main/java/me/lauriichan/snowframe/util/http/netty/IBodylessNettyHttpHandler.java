@@ -7,9 +7,9 @@ import me.lauriichan.snowframe.util.http.data.HttpEncoded;
 import me.lauriichan.snowframe.util.http.server.Response;
 
 @FunctionalInterface
-public interface IBodylessNettyHttpHandler<T> extends INettyHttpHandler<T> {
+public interface IBodylessNettyHttpHandler extends INettyHttpHandler<Object> {
 
-    default Response handle(Channel channel, HttpHeaders headers, HttpEncoded query, HttpPath path, HttpData<T> body) {
+    default Response handle(Channel channel, HttpHeaders headers, HttpEncoded query, HttpPath path, HttpData<Object> body) {
         return handle(channel, headers, query, path);
     }
     

@@ -25,6 +25,8 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedInput;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -32,6 +34,7 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.snowframe.util.http.HttpCode;
 import me.lauriichan.snowframe.util.http.HttpHeaders;
+import me.lauriichan.snowframe.util.http.HttpMethod;
 import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
 import me.lauriichan.snowframe.util.http.data.HttpEncoded;
 import me.lauriichan.snowframe.util.http.data.HttpEncoded.MapType;
@@ -42,10 +45,21 @@ import me.lauriichan.snowframe.util.http.server.Response;
 import me.lauriichan.snowframe.util.http.type.HttpContentType;
 
 public final class HttpRouter extends SimpleChannelInboundHandler<FullHttpRequest> {
-    
+
     public static final boolean IS_LINUX = System.getProperty("os.name").toLowerCase().contains("linux");
 
     private static final Function<String, ObjectList<String>> CREATOR = (_i) -> new ObjectArrayList<>();
+
+    private static final Object2ObjectMap<io.netty.handler.codec.http.HttpMethod, HttpMethod> METHOD_MAP;
+
+    static {
+        HttpMethod[] methods = HttpMethod.values();
+        Object2ObjectArrayMap<io.netty.handler.codec.http.HttpMethod, HttpMethod> methodMap = new Object2ObjectArrayMap<>(methods.length);
+        for (HttpMethod method : methods) {
+            methodMap.put(io.netty.handler.codec.http.HttpMethod.valueOf(method.name()), method);
+        }
+        METHOD_MAP = Object2ObjectMaps.unmodifiable(methodMap);
+    }
 
     private final ISimpleLogger logger;
     private final HttpNode root;
@@ -76,10 +90,15 @@ public final class HttpRouter extends SimpleChannelInboundHandler<FullHttpReques
                 return;
             }
             HttpNode node = resolvedPath.node();
-            if (!node.isHandled()) {
+            if (!node.isAnyHandled()) {
                 return;
             }
-            response = node.handler().handle(ctx.channel(), headers, query, resolvedPath, content);
+            HttpMethod method = METHOD_MAP.get(msg.method());
+            if (method == null || !node.isHandled(method)) {
+                response = Response.of(HttpCode.METHOD_NOT_ALLOWED);
+                return;
+            }
+            response = node.handler(method).handle(ctx.channel(), headers, query, resolvedPath, content);
         } finally {
             if (response == null) {
                 response = Response.of(HttpCode.NOT_IMPLEMENTED);
