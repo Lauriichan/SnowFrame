@@ -447,7 +447,7 @@ public final class HttpHeaders {
     }
     
     public IHeaderArgs getArgumentsModifiable(String key) {
-        return getArguments(key, 0);
+        return getArgumentsModifiable(key, 0);
     }
     
     public IHeaderArgs getArgumentsModifiable(String key, int index) {
