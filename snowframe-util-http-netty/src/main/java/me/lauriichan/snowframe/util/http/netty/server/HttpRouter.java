@@ -24,6 +24,7 @@ import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedInput;
+import io.netty.util.AttributeKey;
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
@@ -47,6 +48,7 @@ import me.lauriichan.snowframe.util.http.type.HttpContentType;
 public final class HttpRouter extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     public static final boolean IS_LINUX = System.getProperty("os.name").toLowerCase().contains("linux");
+    public static final AttributeKey<HttpMethod> METHOD = AttributeKey.valueOf("HttpMethod");
 
     private static final Function<String, ObjectList<String>> CREATOR = (_i) -> new ObjectArrayList<>();
 
@@ -98,6 +100,7 @@ public final class HttpRouter extends SimpleChannelInboundHandler<FullHttpReques
                 response = Response.of(HttpCode.METHOD_NOT_ALLOWED);
                 return;
             }
+            ctx.channel().attr(METHOD).set(method);
             response = node.handler(method).handle(ctx.channel(), headers, query, resolvedPath, content);
         } finally {
             if (response == null) {
