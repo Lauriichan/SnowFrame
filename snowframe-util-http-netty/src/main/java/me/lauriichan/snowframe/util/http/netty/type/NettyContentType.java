@@ -11,12 +11,31 @@ import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.lauriichan.snowframe.util.http.HttpHeaders;
 import me.lauriichan.snowframe.util.http.HttpHeaders.IHeaderArgs;
+import me.lauriichan.snowframe.util.http.data.MultiFormData;
 import me.lauriichan.snowframe.util.http.netty.INettyContentType;
 import me.lauriichan.snowframe.util.http.type.HttpContentType;
 
 public abstract class NettyContentType<T> extends HttpContentType<T> implements INettyContentType<T> {
 
-    public static final HttpContentType<ByteBuf> NETTY_BINARY = NettyBinaryContentType.NETTY_BINARY;
+    public static final NettyContentType<ByteBuf> NETTY_BINARY = NettyBinaryContentType.NETTY_BINARY;
+    public static final HttpContentType<String> NETTY_TEXT = PlainTextNettyContentType.PLAIN_TEXT;
+
+    public static final NettyContentType<MultiFormData> DEFAULT_MULTIFORM_DATA = multiFormDataNetty();
+
+    public static final NettyContentType<MultiFormData> multiFormDataNetty(HttpContentType<?>... accepts) {
+        if (accepts == null || accepts.length == 0) {
+            if (DEFAULT_MULTIFORM_DATA != null) {
+                return DEFAULT_MULTIFORM_DATA;
+            }
+            accepts = new HttpContentType[] {
+                URL_ENCODED,
+                JSON,
+                NETTY_TEXT,
+                BINARY
+            };
+        }
+        return new MultiFormDataNettyContentType(accepts);
+    }
 
     public NettyContentType(String name, Class<? super T> valueType, String... acceptPattern) {
         super(name, valueType, acceptPattern);
