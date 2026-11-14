@@ -36,13 +36,15 @@ public final class HttpInit extends ChannelInitializer<SocketChannel> {
             pipeline.addLast("http-request-decompressor", new HttpContentDecompressor(config.decompressionMaxLength()));
         }
         pipeline.addLast("http-request-aggregator", new HttpObjectAggregator(config.maxLength(), true));
-        pipeline.addLast("http-router", new HttpRouter(logger, root));
         
         // Outbound
         if (config.enableCompression()) {
             pipeline.addLast("http-response-compressor", new HttpContentCompressor(config.compressionMinLength(), (CompressionOptions[]) null));
         }
         pipeline.addLast("http-response-encoder", new HttpResponseEncoder());
+        
+        // Handler
+        pipeline.addLast("http-router", new HttpRouter(logger, root));
     }
 
 }
