@@ -253,7 +253,7 @@ public final class HttpRequest {
             stream.close();
         }
 
-        HttpHeaders headers = new HttpHeaders(new NormalizedMap(connection.getHeaderFields()));
+        HttpHeaders headers = new HttpHeaders(new NormalizedMap(connection.getHeaderFields()), false);
         InputStream stream;
         try {
             stream = connection.getInputStream();

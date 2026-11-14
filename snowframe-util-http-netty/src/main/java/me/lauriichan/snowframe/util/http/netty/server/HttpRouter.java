@@ -81,7 +81,7 @@ public final class HttpRouter extends SimpleChannelInboundHandler<FullHttpReques
         map.trim();
 
         String path = queryDecoder.path();
-        HttpHeaders headers = new HttpHeaders(Object2ObjectMaps.unmodifiable(map));
+        HttpHeaders headers = new HttpHeaders(Object2ObjectMaps.unmodifiable(map), false);
         HttpEncoded query = HttpEncoded.parse(queryDecoder.rawQuery(), MapType.IMMUTABLE);
         ByteBuf content = msg.content();
 
@@ -121,17 +121,14 @@ public final class HttpRouter extends SimpleChannelInboundHandler<FullHttpReques
             ctx.writeAndFlush(httpResponse);
             return;
         }
-        IHeaderArgs originalArgs = headers.getArguments("Content-Type");
-        IHeaderArgs args;
-        if (originalArgs == null) {
-            args = HttpHeaders.modifiableArgs();
+        IHeaderArgs args = headers.getArgumentsModifiable("Content-Type");
+        if (!args.hasUnnamed()) {
             args.addUnnamed(response.content().type().name());
-        } else {
-            args = HttpHeaders.modifiableArgs(originalArgs);
         }
         ObjectArrayList<Object> output = new ObjectArrayList<>();
         writeContent(args, response.content(), output);
-        headers.getArguments("Transfer-Encoding").reset().addUnnamed("chunked");
+        headers.set("Transfer-Encoding", "chunked");
+        headers.setValue("Content-Type", args);
         headers.entries().forEach(entry -> httpResponse.headers().set(entry.getKey(), entry.getValue()));
         ctx.write(httpResponse);
         Charset charset = response.content().type().charset();

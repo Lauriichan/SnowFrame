@@ -56,14 +56,10 @@ final class BasicHttpHandler<T> implements HttpHandler {
             }
             int length = 0;
             byte[] data;
-            HttpHeaders headers = new HttpHeaders(exchange.getResponseHeaders());
-            IHeaderArgs originalArgs = headers.getArguments("Content-Type");
-            IHeaderArgs args;
-            if (originalArgs == null) {
-                args = HttpHeaders.modifiableArgs();
+            HttpHeaders headers = new HttpHeaders(exchange.getResponseHeaders(), true);
+            IHeaderArgs args = headers.getArgumentsModifiable("Content-Type");
+            if (!args.hasUnnamed()) {
                 args.addUnnamed(content.type().name());
-            } else {
-                args = HttpHeaders.modifiableArgs(originalArgs);
             }
             try (FastByteArrayOutputStream output = new FastByteArrayOutputStream()) {
                 content.write(args, output);
@@ -126,7 +122,7 @@ final class BasicHttpHandler<T> implements HttpHandler {
                 length = buffer.length;
             }
         }
-        HttpHeaders headers = new HttpHeaders(exchange.getRequestHeaders());
+        HttpHeaders headers = new HttpHeaders(exchange.getRequestHeaders(), false);
         HttpData<T> body;
         try (FastByteArrayInputStream input = new FastByteArrayInputStream(data, 0, length)) {
             body = new HttpData<>(bodyType.read(headers, input), null);

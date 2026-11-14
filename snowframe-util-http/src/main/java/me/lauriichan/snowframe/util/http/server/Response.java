@@ -139,7 +139,7 @@ public final class Response {
         for (Entry<String, ObjectArrayList<String>> entry : headers.object2ObjectEntrySet()) {
             map.put(entry.getKey(), new ObjectArrayList<>(entry.getValue()));
         }
-        return new HttpHeaders(map);
+        return new HttpHeaders(map, true);
     }
 
 }

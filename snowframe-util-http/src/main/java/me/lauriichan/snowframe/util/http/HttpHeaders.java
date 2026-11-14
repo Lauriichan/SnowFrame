@@ -113,7 +113,7 @@ public final class HttpHeaders {
         public boolean allowsOverwrite() {
             return allowsOverwrite;
         }
-        
+
         @Override
         public ModifiableHeaderArgs reset() {
             if (!allowsOverwrite) {
@@ -249,7 +249,7 @@ public final class HttpHeaders {
         default boolean allowsOverwrite() {
             return false;
         }
-        
+
         default IHeaderArgs reset() {
             throw new UnsupportedOperationException();
         }
@@ -301,9 +301,11 @@ public final class HttpHeaders {
     }
 
     private final Map<String, List<String>> delegate;
+    private final boolean modifiable;
 
-    public HttpHeaders(Map<String, List<String>> delegate) {
+    public HttpHeaders(Map<String, List<String>> delegate, boolean modifiable) {
         this.delegate = delegate;
+        this.modifiable = modifiable;
     }
 
     public Map<String, List<String>> delegate() {
@@ -317,6 +319,10 @@ public final class HttpHeaders {
     public Set<Entry<String, List<String>>> entries() {
         return delegate.entrySet();
     }
+    
+    public boolean isModifiable() {
+        return modifiable;
+    }
 
     public boolean has(String key) {
         List<String> list = delegate.get(key);
@@ -325,6 +331,91 @@ public final class HttpHeaders {
 
     public List<String> get(String key) {
         return delegate.get(key);
+    }
+
+    public HttpHeaders remove(String key) {
+        if (!modifiable) {
+            return this;
+        }
+        delegate.remove(key);
+        return this;
+    }
+
+    public HttpHeaders set(String key, List<String> list) {
+        if (!modifiable || list == null || key == null || key.isBlank()) {
+            return this;
+        }
+        delegate.put(key, list);
+        return this;
+    }
+
+    public HttpHeaders set(String key, String string) {
+        if (!modifiable || string == null || key == null || key.isBlank()) {
+            return this;
+        }
+        List<String> list = delegate.get(key);
+        if (list == null) {
+            list = new ObjectArrayList<>();
+            delegate.put(key, list);
+        } else {
+            list.clear();
+        }
+        list.add(string);
+        return this;
+    }
+    
+    public HttpHeaders setValue(String key, IHeaderArgs args) {
+        return setValue(key, 0, args);
+    }
+    
+    public HttpHeaders setValue(String key, int index, IHeaderArgs args) {
+        if (args == null) {
+            return this;
+        }
+        return setValue(key, index, args.asHeaderValue());
+    }
+    
+    public HttpHeaders setValue(String key, String value) {
+        return setValue(key, 0, value);
+    }
+    
+    public HttpHeaders setValue(String key, int index, String value) {
+        if (!modifiable || value == null || value.isBlank() || key == null || key.isBlank()) {
+            return this;
+        }
+        List<String> list = delegate.get(key);
+        if (list == null) {
+            list = new ObjectArrayList<>();
+            delegate.put(key, list);
+        }
+        if (index >= list.size()) {
+            index = list.size() - 1;
+        } else if (list.isEmpty()) {
+            list.add(value);
+            return this;
+        }
+        list.set(index, value);
+        return this;
+    }
+
+    public HttpHeaders addValue(String key, IHeaderArgs args) {
+        if (args == null) {
+            return this;
+        }
+        return addValue(key, args.asHeaderValue());
+    }
+
+    public HttpHeaders addValue(String key, String value) {
+        if (!modifiable || value == null || value.isBlank() || key == null || key.isBlank()) {
+            return this;
+        }
+        List<String> list = delegate.get(key);
+        if (list == null) {
+            list = new ObjectArrayList<>();
+            delegate.put(key, list);
+        }
+        list.add(value);
+        return this;
     }
 
     public String getValue(String key) {
@@ -353,6 +444,18 @@ public final class HttpHeaders {
 
     public ObjectList<String> getValueAsList(String key, int index) {
         return asList(getValue(key, index));
+    }
+    
+    public IHeaderArgs getArgumentsModifiable(String key) {
+        return getArguments(key, 0);
+    }
+    
+    public IHeaderArgs getArgumentsModifiable(String key, int index) {
+        IHeaderArgs args = getArguments(key, index);
+        if (args == null) {
+            return modifiableArgs();
+        }
+        return modifiableArgs(args);
     }
 
     public IHeaderArgs getArguments(String key) {

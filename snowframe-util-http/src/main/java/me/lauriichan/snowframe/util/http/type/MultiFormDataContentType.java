@@ -135,7 +135,7 @@ final class MultiFormDataContentType extends HttpContentType<MultiFormData> {
         if (firstCh == CR || firstCh == LF) {
             int ch = input.read();
             if (ch == CR || ch == LF) {
-                return new HttpHeaders(hdrs);
+                return new HttpHeaders(hdrs, false);
             }
             firstCh = ch;
         }
@@ -208,7 +208,7 @@ final class MultiFormDataContentType extends HttpContentType<MultiFormData> {
             hdrs.add(key, value);
             length = 0;
         }
-        return new HttpHeaders(hdrs);
+        return new HttpHeaders(hdrs, false);
     }
     
     @Override

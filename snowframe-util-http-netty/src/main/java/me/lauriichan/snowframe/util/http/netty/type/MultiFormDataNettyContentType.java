@@ -152,7 +152,7 @@ final class MultiFormDataNettyContentType extends NettyContentType<MultiFormData
         if (firstCh == CR || firstCh == LF) {
             int ch = input.readByte();
             if (ch == CR || ch == LF) {
-                return new HttpHeaders(hdrs);
+                return new HttpHeaders(hdrs, false);
             }
             firstCh = ch;
         }
@@ -225,7 +225,7 @@ final class MultiFormDataNettyContentType extends NettyContentType<MultiFormData
             hdrs.add(key, value);
             length = 0;
         }
-        return new HttpHeaders(hdrs);
+        return new HttpHeaders(hdrs, false);
     }
 
     @Override
