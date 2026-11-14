@@ -10,6 +10,7 @@ import java.util.function.Function;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.DefaultFileRegion;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -189,7 +190,7 @@ public final class HttpRouter extends SimpleChannelInboundHandler<FullHttpReques
             }
             logger.warning("Unsupported response content, skipping: " + obj.getClass().getName());
         }
-        ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
+        ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT).addListener(ChannelFutureListener.CLOSE);
     }
 
     @SuppressWarnings("unchecked")
@@ -202,6 +203,12 @@ public final class HttpRouter extends SimpleChannelInboundHandler<FullHttpReques
         FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream();
         contentType.write(args, outputStream, content.value());
         output.add(Unpooled.wrappedBuffer(outputStream.array, 0, outputStream.length));
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        cause.printStackTrace();
+        ctx.close();
     }
 
 }

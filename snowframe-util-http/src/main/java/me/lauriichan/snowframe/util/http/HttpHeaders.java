@@ -319,7 +319,7 @@ public final class HttpHeaders {
     public Set<Entry<String, List<String>>> entries() {
         return delegate.entrySet();
     }
-    
+
     public boolean isModifiable() {
         return modifiable;
     }
@@ -363,22 +363,22 @@ public final class HttpHeaders {
         list.add(string);
         return this;
     }
-    
+
     public HttpHeaders setValue(String key, IHeaderArgs args) {
         return setValue(key, 0, args);
     }
-    
+
     public HttpHeaders setValue(String key, int index, IHeaderArgs args) {
         if (args == null) {
             return this;
         }
         return setValue(key, index, args.asHeaderValue());
     }
-    
+
     public HttpHeaders setValue(String key, String value) {
         return setValue(key, 0, value);
     }
-    
+
     public HttpHeaders setValue(String key, int index, String value) {
         if (!modifiable || value == null || value.isBlank() || key == null || key.isBlank()) {
             return this;
@@ -388,11 +388,11 @@ public final class HttpHeaders {
             list = new ObjectArrayList<>();
             delegate.put(key, list);
         }
-        if (index >= list.size()) {
-            index = list.size() - 1;
-        } else if (list.isEmpty()) {
+        if (list.isEmpty()) {
             list.add(value);
             return this;
+        } else if (index >= list.size()) {
+            index = list.size() - 1;
         }
         list.set(index, value);
         return this;
@@ -445,11 +445,11 @@ public final class HttpHeaders {
     public ObjectList<String> getValueAsList(String key, int index) {
         return asList(getValue(key, index));
     }
-    
+
     public IHeaderArgs getArgumentsModifiable(String key) {
         return getArgumentsModifiable(key, 0);
     }
-    
+
     public IHeaderArgs getArgumentsModifiable(String key, int index) {
         IHeaderArgs args = getArguments(key, index);
         if (args == null) {
