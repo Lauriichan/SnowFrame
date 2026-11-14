@@ -24,12 +24,12 @@ final class PlainTextNettyContentType extends NettyContentType<String> {
 
     @Override
     public String readNetty(HttpHeaders headers, ByteBuf buffer) throws IOException {
-        return buffer.toString(StandardCharsets.UTF_8);
+        return buffer.toString(charsetFor(headers));
     }
     
     @Override
     public void writeNetty(IHeaderArgs typeArgs, String value, ObjectList<Object> output) throws IOException {
-        typeArgs.set("charset", "utf-8");
+        typeArgs.set("charset", charset().name());
         output.add(value);
     }
 

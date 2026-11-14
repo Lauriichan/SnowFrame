@@ -1,6 +1,8 @@
 package me.lauriichan.snowframe.util.http.netty.type;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -28,6 +30,18 @@ public abstract class NettyContentType<T> extends HttpContentType<T> implements 
     @Override
     public NettyContentType<T> disguise(String name) {
         return new DisguisedNettyContentType<>(this, name);
+    }
+
+    protected final Charset charsetFor(HttpHeaders headers) {
+        String charsetName = headers.getArguments("Content-Type").get("charset");
+        if (charsetName == null) {
+            return charset();
+        }
+        try {
+            return Charset.forName(charsetName);
+        } catch (UnsupportedCharsetException uce) {
+            return charset();
+        }
     }
 
     @Override

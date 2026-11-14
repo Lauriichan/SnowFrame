@@ -29,12 +29,12 @@ public final class UrlEncodedNettyContentType extends NettyContentType<HttpEncod
 
     @Override
     public HttpEncoded readNetty(HttpHeaders headers, ByteBuf buffer) throws IOException {
-        return HttpEncoded.parse(buffer.toString(StandardCharsets.UTF_8));
+        return HttpEncoded.parse(buffer.toString(charsetFor(headers)));
     }
 
     @Override
     public void writeNetty(IHeaderArgs typeArgs, HttpEncoded value, ObjectList<Object> output) throws IOException {
-        typeArgs.set("charset", "utf-8");
+        typeArgs.set("charset", charset().name());
         output.add(value.asEncodedString());
     }
 
