@@ -20,6 +20,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpChunkedInput;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.codec.http.QueryStringDecoder;
@@ -49,7 +50,9 @@ import me.lauriichan.snowframe.util.http.type.HttpContentType;
 public final class HttpRouter extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     public static final boolean IS_LINUX = System.getProperty("os.name").toLowerCase().contains("linux");
+    
     public static final AttributeKey<HttpMethod> METHOD = AttributeKey.valueOf("HttpMethod");
+    public static final AttributeKey<Boolean> SWITCHED_PROTOCOL = AttributeKey.valueOf("SwitchedProtocol");
 
     private static final Function<String, ObjectList<String>> CREATOR = (_i) -> new ObjectArrayList<>();
 
@@ -104,15 +107,19 @@ public final class HttpRouter extends SimpleChannelInboundHandler<FullHttpReques
             ctx.channel().attr(METHOD).set(method);
             response = node.handler(method).handle(ctx.channel(), headers, query, resolvedPath, content);
         } finally {
+            Boolean switchedProtocol = ctx.channel().attr(SWITCHED_PROTOCOL).get();
+            if (switchedProtocol != null && switchedProtocol) {
+                return;
+            }
             if (response == null) {
                 response = Response.of(HttpCode.NOT_IMPLEMENTED);
             }
-            writeResponse(ctx, msg.protocolVersion(), response);
+            writeResponse(ctx, msg.protocolVersion(), response, HttpUtil.isKeepAlive(msg));
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void writeResponse(ChannelHandlerContext ctx, HttpVersion version, Response response) throws IOException {
+    private void writeResponse(ChannelHandlerContext ctx, HttpVersion version, Response response, boolean keepAlive) throws IOException {
         HttpHeaders headers = response.asHeaders();
         Response.Content<?> content = response.content();
 
@@ -190,7 +197,10 @@ public final class HttpRouter extends SimpleChannelInboundHandler<FullHttpReques
             }
             logger.warning("Unsupported response content, skipping: " + obj.getClass().getName());
         }
-        ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT).addListener(ChannelFutureListener.CLOSE);
+        var future = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
+        if (keepAlive) {
+            future.addListener(ChannelFutureListener.CLOSE);
+        }
     }
 
     @SuppressWarnings("unchecked")
